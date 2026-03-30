@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oblique Writer</title>
+<meta name="description" content="Encrypted personal writing app">
+<meta name="theme-color" content="#0e0e0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Oblique Writer">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230e0e0c'/%3E%3Ctext x='256' y='340' font-family='Georgia,serif' font-size='300' fill='%23e87830' text-anchor='middle' font-style='italic'%3Eo%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Oblique+Writer%22%2C%22short_name%22%3A%22Oblique%22%2C%22description%22%3A%22Encrypted+personal+writing+app%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230e0e0c%22%2C%22theme_color%22%3A%22%230e0e0c%22%2C%22orientation%22%3A%22any%22%7D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Source+Code+Pro:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e0c;
+  --surface:#161614;
+  --surface2:#1e1e1b;
+  --surface3:#252520;
+  --border:#2a2a26;
+  --border2:#3a3a35;
+  --text:#e0dbd0;
+  --text2:#a09890;
+  --text3:#787068;
+  --accent:#e87830;
+  --accent2:#c05f18;
+  --danger:#c85050;
+  --editor-font:'Courier New',Courier,monospace;
+  --editor-size:14px;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column}
+
+/* ── LOCK SCREEN ── */
+#lock-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#lock-screen.hidden{display:none}
+.lock-logo{font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:3rem}
+.lock-box{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:32px 36px;width:320px;display:flex;flex-direction:column;gap:16px}
+.lock-title{font-size:13px;color:var(--text2);letter-spacing:0.08em;text-align:center}
+.lock-title span{color:var(--accent)}
+.lock-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:4px;font-size:14px;font-family:var(--sans);outline:none;letter-spacing:0.08em;text-align:center}
+.lock-input:focus{border-color:var(--accent)}
+.lock-btn{width:100%;background:none;border:1px solid var(--accent);color:var(--accent);padding:9px;border-radius:4px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all 0.15s}
+.lock-btn:hover{background:rgba(232,120,48,0.1)}
+.lock-btn:disabled{opacity:0.4;cursor:default}
+.lock-error{font-size:11px;color:var(--danger);text-align:center;min-height:16px;letter-spacing:0.05em}
+.lock-hint{font-size:10px;color:var(--text3);text-align:center;letter-spacing:0.05em;line-height:1.7}
+#lock-timeout-wrap{margin-top:2rem;display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text3);letter-spacing:0.06em}
+#lock-timeout-wrap select{background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:3px 6px;border-radius:3px;font-size:10px;font-family:var(--sans);outline:none;cursor:pointer}
+
+/* ── TITLEBAR ── */
+#titlebar{height:36px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;user-select:none}
+#app-name{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);font-weight:400}
+#titlebar-spacer{flex:1}
+#kb-hint{font-size:10px;color:var(--text3);letter-spacing:0.05em}
+#lock-now-btn{background:none;border:1px solid var(--border2);color:var(--text3);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer;font-family:var(--sans);letter-spacing:0.08em;transition:all 0.15s}
+#lock-now-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ── SIDEBAR ── */
+#sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#sidebar-header{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#sidebar-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3)}
+#new-btn{background:none;border:1px solid var(--border2);color:var(--text2);width:22px;height:22px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all 0.15s}
+#new-btn:hover{border-color:var(--accent);color:var(--accent)}
+#doc-list{flex:1;overflow-y:auto;padding:4px}
+#doc-list::-webkit-scrollbar{width:3px}
+#doc-list::-webkit-scrollbar-thumb{background:var(--border2)}
+.doc-item{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:4px;cursor:pointer;transition:background 0.1s;border-left:2px solid transparent}
+.doc-item:hover{background:var(--surface2)}
+.doc-item.active{background:var(--surface3);border-left-color:var(--accent);padding-left:8px}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-item.active .doc-name{color:var(--accent)}
+.doc-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.doc-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0;transition:opacity 0.15s;padding:3px 5px;border-radius:2px;line-height:1;flex-shrink:0}
+.doc-item:hover .doc-del{opacity:1}
+.doc-del:hover{color:var(--danger)}
+#sidebar-foot{padding:8px 12px;border-top:1px solid var(--border)}
+#doc-count{font-size:10px;color:var(--text3)}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#topbar{padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
+#title-input{background:none;border:none;color:var(--text);font-size:14px;font-weight:400;flex:1;outline:none;font-family:var(--sans);min-width:0}
+#title-input::placeholder{color:var(--text3)}
+.sep{width:1px;height:16px;background:var(--border);margin:0 2px}
+.tb-btn{background:none;border:none;color:var(--text2);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;padding:4px 8px;border-radius:3px;transition:all 0.15s;font-family:var(--sans);white-space:nowrap}
+.tb-btn:hover{background:var(--surface2);color:var(--text)}
+.tb-btn.on{color:var(--accent)}
+#save-badge{font-size:10px;color:var(--text3);letter-spacing:0.06em;min-width:48px;text-align:right}
+
+/* EDITOR */
+#editor-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative}
+#editor{flex:1;width:100%;background:var(--bg);color:var(--text);border:none;outline:none;resize:none;font-family:var(--editor-font);font-size:var(--editor-size);line-height:1.85;padding:44px 72px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;caret-color:var(--accent);tab-size:2}
+#editor::placeholder{color:var(--text3)}
+#editor::-webkit-scrollbar{width:4px}
+#editor::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+#preview{flex:1;padding:44px 72px;overflow-y:auto;display:none;line-height:1.9;background:var(--bg);color:var(--text);font-family:var(--editor-font);font-size:var(--editor-size)}
+#preview::-webkit-scrollbar{width:4px}
+#preview::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+#preview h1,#preview h2,#preview h3,#preview h4{font-family:var(--sans);font-weight:400;color:#f0ebe0;margin:2rem 0 0.7rem;line-height:1.25}
+#preview h1{font-size:1.9rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;margin-top:0}
+#preview h2{font-size:1.45rem}
+#preview h3{font-size:1.15rem}
+#preview p{margin:0 0 1rem}
+#preview strong{color:#f0ebe0;font-weight:500}
+#preview em{color:#c8b890;font-style:italic}
+#preview code{background:var(--surface2);padding:2px 6px;border-radius:3px;font-family:'Courier New',monospace;font-size:0.875em;color:#c8c0a0}
+#preview pre{background:var(--surface2);padding:1rem 1.2rem;border-radius:5px;overflow-x:auto;margin:1rem 0;border:1px solid var(--border)}
+#preview pre code{background:none;padding:0}
+#preview blockquote{border-left:2px solid var(--accent2);padding-left:1.2rem;color:var(--text2);margin:1rem 0;font-style:italic}
+#preview ul,#preview ol{padding-left:1.6rem;margin:0.5rem 0 1rem}
+#preview li{margin:0.3rem 0}
+#preview hr{border:none;border-top:1px solid var(--border);margin:2rem 0}
+#preview a{color:var(--accent);text-decoration:none}
+#preview a:hover{text-decoration:underline}
+#preview table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px}
+#preview th,#preview td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+#preview th{background:var(--surface2);color:var(--text2);font-weight:400;font-size:11px;letter-spacing:0.1em;text-transform:uppercase}
+
+/* EMPTY STATE */
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:10px}
+#empty .e-title{font-size:12px;letter-spacing:0.15em;text-transform:uppercase}
+#empty .e-hint{font-size:11px;opacity:0.7}
+
+/* STATUS BAR */
+#statusbar{padding:4px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:18px;background:var(--surface);flex-shrink:0}
+.stat{font-size:10px;color:var(--text3);letter-spacing:0.06em}
+
+/* SETTINGS */
+#settings-panel{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+#settings-panel.open{display:flex}
+#settings-box{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:28px 32px;width:380px;display:flex;flex-direction:column;gap:0}
+#settings-box h3{font-size:13px;font-weight:400;color:var(--text);letter-spacing:0.08em;margin-bottom:20px}
+.settings-section{border-top:1px solid var(--border);padding:16px 0;display:flex;flex-direction:column;gap:14px}
+.settings-section-title{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.setting-label{font-size:12px;color:var(--text2);letter-spacing:0.05em}
+.setting-row select{background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;font-family:var(--sans);outline:none;cursor:pointer}
+.setting-row select:focus{border-color:var(--accent)}
+.setting-row input[type=range]{width:120px;accent-color:var(--accent)}
+.setting-value{font-size:11px;color:var(--text2);min-width:28px;text-align:right}
+.settings-foot{display:flex;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--border)}
+.settings-close{background:none;border:1px solid var(--border2);color:var(--text2);padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--sans);transition:all 0.15s}
+.settings-close:hover{background:var(--surface3);color:var(--text)}
+.setting-note{font-size:10px;color:var(--text3);line-height:1.7;letter-spacing:0.04em}
+
+/* CHANGE PASSWORD */
+.change-pass-fields{display:flex;flex-direction:column;gap:8px}
+.change-pass-fields input{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;font-family:var(--sans);outline:none}
+.change-pass-fields input:focus{border-color:var(--accent)}
+.change-pass-fields input::placeholder{color:var(--text3)}
+#change-pass-btn{background:none;border:1px solid var(--border2);color:var(--text2);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--sans);transition:all 0.15s;align-self:flex-end}
+#change-pass-btn:hover{border-color:var(--accent);color:var(--accent)}
+#change-pass-btn:disabled{opacity:0.4;cursor:default}
+#change-pass-status{font-size:11px;min-height:15px;letter-spacing:0.04em}
+#change-pass-status.ok{color:#6a9a6a}
+#change-pass-status.err{color:var(--danger)}
+
+/* MODAL */
+#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:200;display:none;align-items:center;justify-content:center}
+#modal-bg.open{display:flex}
+#modal{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:24px;width:320px}
+#modal h3{font-size:13px;font-weight:400;color:var(--text);margin-bottom:14px;letter-spacing:0.06em}
+#modal-name{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:4px;font-size:13px;font-family:var(--sans);outline:none;margin-bottom:16px}
+#modal-name:focus{border-color:var(--accent)}
+.modal-row{display:flex;justify-content:flex-end;gap:8px}
+.m-btn{background:none;border:1px solid var(--border2);color:var(--text2);padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--sans);transition:all 0.15s}
+.m-btn:hover{background:var(--surface3);color:var(--text)}
+.m-btn.primary{border-color:var(--accent);color:var(--accent)}
+.m-btn.primary:hover{background:rgba(232,120,48,0.1)}
+
+#file-input{display:none}
+
+/* FOCUS MODE */
+body.focus-mode #sidebar,body.focus-mode #titlebar,body.focus-mode #topbar,body.focus-mode #statusbar{display:none!important}
+body.focus-mode #editor{padding:80px min(120px,12vw)}
+
+@media(max-width:600px){
+  #sidebar{width:180px;min-width:180px}
+  #editor,#preview{padding:24px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-logo">Oblique Writer</div>
+  <div class="lock-box">
+    <div class="lock-title" id="lock-title">Enter passphrase to <span>unlock</span></div>
+    <input class="lock-input" type="password" id="lock-pass" placeholder="··········" autocomplete="off" spellcheck="false">
+    <div class="lock-error" id="lock-error"></div>
+    <button class="lock-btn" id="lock-submit">Unlock</button>
+    <div class="lock-hint" id="lock-hint" style="display:none">
+      First time? Choose a passphrase and press Unlock to set it.<br>
+      <strong style="color:var(--danger)">If you forget your passphrase, your documents cannot be recovered.</strong>
+    </div>
+  </div>
+  <div id="lock-timeout-wrap">
+    <span>Lock after</span>
+    <select id="timeout-select-lock">
+      <option value="1">1 min</option>
+      <option value="5" selected>5 min</option>
+      <option value="10">10 min</option>
+      <option value="15">15 min</option>
+      <option value="30">30 min</option>
+      <option value="60">60 min</option>
+      <option value="0">Never</option>
+    </select>
+    <span>of inactivity</span>
+  </div>
+</div>
+
+<!-- TITLEBAR -->
+<div id="titlebar" style="display:none">
+  <span id="app-name">Oblique Writer</span>
+  <span id="titlebar-spacer"></span>
+  <span id="kb-hint">Ctrl+N new · Ctrl+P preview · Ctrl+Shift+F focus · Esc exit focus</span>
+  <button id="lock-now-btn">Lock</button>
+</div>
+
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <span id="sidebar-label">Documents</span>
+      <button id="new-btn" title="New document (Ctrl+N)">+</button>
+    </div>
+    <div id="doc-list"></div>
+    <div id="sidebar-foot">
+      <div id="doc-count">0 documents</div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="topbar" style="display:none">
+      <input id="title-input" placeholder="Untitled" spellcheck="false" autocomplete="off">
+      <div class="sep"></div>
+      <button class="tb-btn on" id="edit-btn">Edit</button>
+      <button class="tb-btn" id="preview-btn">Preview</button>
+      <div class="sep"></div>
+      <button class="tb-btn" id="export-btn">Export</button>
+      <button class="tb-btn" id="import-btn">Import</button>
+      <div class="sep"></div>
+      <button class="tb-btn" id="focus-btn">Focus</button>
+      <button class="tb-btn" id="settings-btn">Settings</button>
+      <span id="save-badge">saved</span>
+    </div>
+    <div id="editor-wrap">
+      <div id="empty">
+        <div class="e-title">No document open</div>
+        <div class="e-hint">Press Ctrl+N or click + to create one</div>
+      </div>
+      <textarea id="editor" style="display:none" placeholder="Start writing…" spellcheck="true" autocorrect="on"></textarea>
+      <div id="preview"></div>
+    </div>
+    <div id="statusbar" style="display:none">
+      <span class="stat" id="s-words">0 words</span>
+      <span class="stat" id="s-chars">0 chars</span>
+      <span class="stat" id="s-lines">0 lines</span>
+      <span class="stat" id="s-reading"></span>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+  <div id="settings-box">
+    <h3>Settings</h3>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Editor</div>
+      <div class="setting-row">
+        <span class="setting-label">Font</span>
+        <select id="font-select">
+          <option value="courier">Courier New</option>
+          <option value="georgia">Georgia</option>
+          <option value="crimson">Crimson Pro</option>
+          <option value="sourcecode">Source Code Pro</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Size</span>
+        <input type="range" id="size-slider" min="11" max="22" step="1" value="14">
+        <span class="setting-value" id="size-val">14px</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Security</div>
+      <div class="setting-row">
+        <span class="setting-label">Lock after inactivity</span>
+        <select id="timeout-select-main">
+          <option value="1">1 minute</option>
+          <option value="5" selected>5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">60 minutes</option>
+          <option value="0">Never</option>
+        </select>
+      </div>
+      <div class="change-pass-fields">
+        <input type="password" id="cp-current" placeholder="Current passphrase" autocomplete="off">
+        <input type="password" id="cp-new" placeholder="New passphrase" autocomplete="off">
+        <input type="password" id="cp-confirm" placeholder="Confirm new passphrase" autocomplete="off">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div id="change-pass-status"></div>
+          <button id="change-pass-btn">Change passphrase</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="setting-note">
+        Documents encrypted with AES-256-GCM · PBKDF2 key derivation (200,000 iterations) · Passphrase never stored · Exports are plain text · No recovery if passphrase forgotten
+      </div>
+    </div>
+
+    <div class="settings-foot">
+      <button class="settings-close" id="settings-close">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW DOC MODAL -->
+<div id="modal-bg">
+  <div id="modal">
+    <h3>New document</h3>
+    <input id="modal-name" placeholder="Document name…" maxlength="80" autocomplete="off">
+    <div class="modal-row">
+      <button class="m-btn" id="m-cancel">Cancel</button>
+      <button class="m-btn primary" id="m-create">Create</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".md,.txt,.markdown">
+
+<script>
+const LS_KEY      = 'oblique_writer_v2';
+const LS_SALT_KEY = 'oblique_writer_salt';
+const LS_PREFS    = 'oblique_writer_prefs';
+
+const FONTS = {
+  courier:    "'Courier New', Courier, monospace",
+  georgia:    "Georgia, 'Times New Roman', serif",
+  crimson:    "'Crimson Pro', Georgia, serif",
+  sourcecode: "'Source Code Pro', 'Courier New', monospace",
+};
+
+let cryptoKey   = null;
+let docs        = {};
+let currentId   = null;
+let mode        = 'edit';
+let saveTimer   = null;
+let focusMode   = false;
+let lockTimeout = 5;
+let lockTimer   = null;
+let isFirstRun  = false;
+let editorFont  = 'courier';
+let editorSize  = 14;
+
+const $ = id => document.getElementById(id);
+
+// ── PREFS ────────────────────────────────────────────
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(LS_PREFS) || '{}');
+    lockTimeout = p.lockTimeout ?? 5;
+    editorFont  = p.editorFont  || 'courier';
+    editorSize  = p.editorSize  || 14;
+  } catch(e) {}
+  $('timeout-select-lock').value = String(lockTimeout);
+  $('timeout-select-main').value = String(lockTimeout);
+  $('font-select').value         = editorFont;
+  $('size-slider').value         = editorSize;
+  $('size-val').textContent      = editorSize + 'px';
+  applyFont();
+}
+
+function savePrefs() {
+  localStorage.setItem(LS_PREFS, JSON.stringify({ lockTimeout, editorFont, editorSize }));
+}
+
+function applyFont() {
+  document.documentElement.style.setProperty('--editor-font', FONTS[editorFont]);
+  document.documentElement.style.setProperty('--editor-size', editorSize + 'px');
+}
+
+// ── CRYPTO ───────────────────────────────────────────
+function bufToHex(buf) {
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function hexToBuf(hex) {
+  const b = new Uint8Array(hex.length/2);
+  for (let i=0;i<b.length;i++) b[i]=parseInt(hex.slice(i*2,i*2+2),16);
+  return b;
+}
+async function getSalt() {
+  let s = localStorage.getItem(LS_SALT_KEY);
+  if (!s) {
+    s = bufToHex(crypto.getRandomValues(new Uint8Array(32)));
+    localStorage.setItem(LS_SALT_KEY, s);
+    isFirstRun = true;
+  }
+  return hexToBuf(s);
+}
+async function deriveKey(pass, salt) {
+  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'},
+    raw, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']
+  );
+}
+async function encryptText(pt, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(pt));
+  return bufToHex(iv)+':'+bufToHex(ct);
+}
+async function decryptText(ct, key) {
+  const [ivH,ctH] = ct.split(':');
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv:hexToBuf(ivH)}, key, hexToBuf(ctH));
+  return new TextDecoder().decode(pt);
+}
+
+// ── STORAGE ──────────────────────────────────────────
+async function persistAll() {
+  if (!cryptoKey) return;
+  localStorage.setItem(LS_KEY, await encryptText(JSON.stringify(docs), cryptoKey));
+}
+async function hydrateAll() {
+  const ct = localStorage.getItem(LS_KEY);
+  if (!ct) { docs={}; return true; }
+  try { docs=JSON.parse(await decryptText(ct,cryptoKey)); return true; }
+  catch(e) { return false; }
+}
+
+// ── LOCK ─────────────────────────────────────────────
+function showLock(msg) {
+  cryptoKey=null; docs={}; currentId=null; clearLockTimer();
+  $('titlebar').style.display='none';
+  $('app').style.display='none';
+  $('lock-screen').classList.remove('hidden');
+  $('lock-pass').value='';
+  $('lock-error').textContent=msg||'';
+  $('lock-title').innerHTML=isFirstRun?'Choose a <span>passphrase</span>':'Enter passphrase to <span>unlock</span>';
+  $('lock-hint').style.display=isFirstRun?'block':'none';
+  setTimeout(()=>$('lock-pass').focus(),100);
+}
+function hideLock() {
+  $('lock-screen').classList.add('hidden');
+  $('titlebar').style.display='flex';
+  $('app').style.display='flex';
+  resetLockTimer();
+}
+async function attemptUnlock() {
+  const pass=$('lock-pass').value;
+  if (!pass) { $('lock-error').textContent='Passphrase required.'; return; }
+  $('lock-submit').disabled=true;
+  $('lock-submit').textContent='Unlocking…';
+  $('lock-error').textContent='';
+  try {
+    const salt=await getSalt();
+    cryptoKey=await deriveKey(pass,salt);
+    const ok=await hydrateAll();
+    if (!ok) {
+      cryptoKey=null;
+      $('lock-error').textContent='Wrong passphrase.';
+      $('lock-pass').value='';
+      setTimeout(()=>$('lock-pass').focus(),50);
+    } else {
+      isFirstRun=false;
+      hideLock();
+      renderList();
+      const recent=Object.keys(docs).sort((a,b)=>docs[b].updated-docs[a].updated)[0];
+      if (recent) openDoc(recent);
+    }
+  } catch(e) { $('lock-error').textContent='Error: '+e.message; cryptoKey=null; }
+  $('lock-submit').disabled=false;
+  $('lock-submit').textContent='Unlock';
+}
+
+// ── CHANGE PASSWORD ──────────────────────────────────
+async function changePassphrase() {
+  const curr=$('cp-current').value;
+  const next=$('cp-new').value;
+  const conf=$('cp-confirm').value;
+  const status=$('change-pass-status');
+  status.className='';
+  status.textContent='';
+  if (!curr||!next||!conf) { status.className='err'; status.textContent='All fields required.'; return; }
+  if (next!==conf) { status.className='err'; status.textContent='New passphrases do not match.'; return; }
+  if (next.length < 6) { status.className='err'; status.textContent='Passphrase too short.'; return; }
+  $('change-pass-btn').disabled=true;
+  $('change-pass-btn').textContent='Working…';
+  try {
+    // Verify current passphrase
+    const salt=hexToBuf(localStorage.getItem(LS_SALT_KEY));
+    const testKey=await deriveKey(curr,salt);
+    const ct=localStorage.getItem(LS_KEY);
+    if (ct) {
+      try { await decryptText(ct,testKey); }
+      catch(e) { status.className='err'; status.textContent='Current passphrase is wrong.'; $('change-pass-btn').disabled=false; $('change-pass-btn').textContent='Change passphrase'; return; }
+    }
+    // Derive new key with same salt, re-encrypt
+    const newKey=await deriveKey(next,salt);
+    cryptoKey=newKey;
+    await persistAll();
+    status.className='ok'; status.textContent='Passphrase changed.';
+    $('cp-current').value=''; $('cp-new').value=''; $('cp-confirm').value='';
+  } catch(e) { status.className='err'; status.textContent='Error: '+e.message; }
+  $('change-pass-btn').disabled=false;
+  $('change-pass-btn').textContent='Change passphrase';
+}
+
+// ── INACTIVITY ───────────────────────────────────────
+function resetLockTimer() {
+  clearLockTimer();
+  if (lockTimeout===0) return;
+  lockTimer=setTimeout(async()=>{ await saveCurrentContent(); showLock(); }, lockTimeout*60*1000);
+}
+function clearLockTimer() { if(lockTimer){clearTimeout(lockTimer);lockTimer=null;} }
+function onActivity() { if(cryptoKey) resetLockTimer(); }
+
+// ── UTILS ────────────────────────────────────────────
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function wordCount(t){ return t.trim()?t.trim().split(/\s+/).length:0; }
+function readingTime(w){ const m=Math.ceil(w/200); return m<1?'':`${m} min read`; }
+
+// ── DOCS ─────────────────────────────────────────────
+function createDoc(name) {
+  const id=uid();
+  docs[id]={id,name:name||'Untitled',content:'',created:Date.now(),updated:Date.now()};
+  persistAll(); renderList(); openDoc(id);
+  setTimeout(()=>$('editor').focus(),80);
+}
+function openDoc(id) {
+  if (!docs[id]) return;
+  currentId=id;
+  const d=docs[id];
+  $('topbar').style.display='flex';
+  $('statusbar').style.display='flex';
+  $('empty').style.display='none';
+  $('title-input').value=d.name;
+  $('editor').value=d.content;
+  $('editor').style.display=mode==='edit'?'block':'none';
+  $('preview').style.display=mode==='preview'?'block':'none';
+  if (mode==='preview') doPreview();
+  updateStats(); renderList();
+}
+async function saveCurrentContent() {
+  if (!currentId||!docs[currentId]||!cryptoKey) return;
+  docs[currentId].content=$('editor').value;
+  docs[currentId].updated=Date.now();
+  await persistAll(); renderList();
+}
+function deleteDoc(id) {
+  if (!confirm(`Delete "${docs[id]?.name}"?`)) return;
+  delete docs[id]; persistAll();
+  if (currentId===id) {
+    currentId=null;
+    $('topbar').style.display='none';
+    $('statusbar').style.display='none';
+    $('editor').style.display='none';
+    $('preview').style.display='none';
+    $('empty').style.display='flex';
+  }
+  renderList();
+}
+function renderList() {
+  const ids=Object.keys(docs).sort((a,b)=>docs[b].updated-docs[a].updated);
+  $('doc-list').innerHTML=ids.length
+    ?ids.map(id=>{
+        const d=docs[id],w=wordCount(d.content);
+        return `<div class="doc-item${id===currentId?' active':''}" data-id="${id}">
+          <div class="doc-info">
+            <div class="doc-name">${esc(d.name)}</div>
+            <div class="doc-meta">${w.toLocaleString()} words</div>
+          </div>
+          <button class="doc-del" data-del="${id}" title="Delete">✕</button>
+        </div>`;
+      }).join('')
+    :'<div style="padding:24px 12px;font-size:11px;color:var(--text3);text-align:center">No documents yet</div>';
+  $('doc-count').textContent=`${ids.length} document${ids.length!==1?'s':''}`;
+}
+function updateStats() {
+  const txt=$('editor').value,w=wordCount(txt);
+  $('s-words').textContent=`${w.toLocaleString()} words`;
+  $('s-chars').textContent=`${txt.length.toLocaleString()} chars`;
+  $('s-lines').textContent=`${(txt?txt.split('\n').length:0).toLocaleString()} lines`;
+  $('s-reading').textContent=readingTime(w);
+}
+function setMode(m) {
+  mode=m;
+  $('edit-btn').classList.toggle('on',m==='edit');
+  $('preview-btn').classList.toggle('on',m==='preview');
+  $('editor').style.display=m==='edit'?'block':'none';
+  $('preview').style.display=m==='preview'?'block':'none';
+  if (m==='preview') doPreview();
+  if (m==='edit') setTimeout(()=>$('editor').focus(),50);
+}
+
+// ── MARKDOWN ─────────────────────────────────────────
+function doPreview(){ $('preview').innerHTML=renderMD($('editor').value); }
+function renderMD(src) {
+  const blocks=[];
+  src=src.replace(/```([\s\S]*?)```/g,(_,c)=>{ blocks.push(`<pre><code>${esc(c.trim())}</code></pre>`); return `\x00B${blocks.length-1}\x00`; });
+  src=src.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  src=src.replace(/`([^`]+?)`/g,(_,c)=>`<code>${c}</code>`);
+  src=src.replace(/^(#{1,6})\s+(.+)$/gm,(_,h,t)=>`<h${h.length}>${t}</h${h.length}>`);
+  src=src.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  src=src.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  src=src.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  src=src.replace(/___(.+?)___/g,'<strong><em>$1</em></strong>');
+  src=src.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  src=src.replace(/_([^_\n]+?)_/g,'<em>$1</em>');
+  src=src.replace(/~~(.+?)~~/g,'<del>$1</del>');
+  src=src.replace(/^[-*_]{3,}$/gm,'<hr>');
+  src=src.replace(/^&gt;\s?(.+)$/gm,'<blockquote>$1</blockquote>');
+  src=src.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%">');
+  src=src.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  src=src.replace(/^[ \t]*[-*+]\s+(.+)$/gm,'<li>$1</li>');
+  src=src.replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
+  src=src.replace(/^\d+\.\s+(.+)$/gm,'<oli>$1</oli>');
+  src=src.replace(/(<oli>[\s\S]*?<\/oli>\n?)+/g,m=>`<ol>${m.replace(/<\/?oli>/g,x=>x.replace('oli','li'))}</ol>`);
+  // Tables
+  src=src.replace(/((?:^\|.+\|\n?)+)/gm, tableBlock => {
+    const rows = tableBlock.trim().split('\n');
+    if (rows.length < 2) return tableBlock;
+    const isSep = r => /^\|[\s\|\-:]+\|$/.test(r.trim());
+    let html = '<table>';
+    let inBody = false;
+    rows.forEach((row, i) => {
+      if (isSep(row)) { inBody = true; return; }
+      const cells = row.trim().replace(/^\||\|$/g,'').split('|').map(c => c.trim());
+      if (i === 0) {
+        html += '<thead><tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+      } else {
+        html += '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+      }
+    });
+    html += '</tbody></table>';
+    return html;
+  });
+  src=src.replace(/\x00B(\d+)\x00/g,(_,i)=>blocks[+i]);
+  return src.split(/\n{2,}/).map(b=>{ b=b.trim(); if(!b)return''; if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|img|table)/.test(b))return b; return `<p>${b.replace(/\n/g,'<br>')}</p>`; }).join('\n');
+}
+
+// ── EXPORT ───────────────────────────────────────────
+function exportDoc() {
+  if (!currentId||!docs[currentId]) return;
+  const d=docs[currentId],a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([d.content],{type:'text/plain;charset=utf-8'}));
+  a.download=(d.name.replace(/[^\w\s\-]/g,'').trim()||'document')+'.md';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+// ── IMPORT ───────────────────────────────────────────
+$('import-btn').onclick=()=>$('file-input').click();
+$('file-input').onchange=e=>{
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const id=uid();
+    docs[id]={id,name:file.name.replace(/\.(md|txt|markdown)$/i,''),content:ev.target.result,created:Date.now(),updated:Date.now()};
+    persistAll(); renderList(); openDoc(id);
+  };
+  reader.readAsText(file); e.target.value='';
+};
+
+// ── FOCUS ────────────────────────────────────────────
+function toggleFocus() {
+  focusMode=!focusMode;
+  document.body.classList.toggle('focus-mode',focusMode);
+  $('focus-btn').classList.toggle('on',focusMode);
+  $('kb-hint').style.display=focusMode?'none':'';
+}
+
+// ── AUTOSAVE ─────────────────────────────────────────
+function schedSave() {
+  $('save-badge').textContent='saving…'; clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{ await saveCurrentContent(); $('save-badge').textContent='saved'; },700);
+}
+
+// ── SETTINGS EVENTS ──────────────────────────────────
+$('settings-btn').onclick=()=>{ $('change-pass-status').textContent=''; $('settings-panel').classList.add('open'); };
+$('settings-close').onclick=()=>$('settings-panel').classList.remove('open');
+$('settings-panel').onclick=e=>{ if(e.target===$('settings-panel')) $('settings-panel').classList.remove('open'); };
+
+$('font-select').onchange=e=>{
+  editorFont=e.target.value; applyFont(); savePrefs();
+};
+$('size-slider').oninput=e=>{
+  editorSize=parseInt(e.target.value);
+  $('size-val').textContent=editorSize+'px';
+  applyFont(); savePrefs();
+};
+$('timeout-select-main').onchange=e=>{
+  lockTimeout=parseInt(e.target.value);
+  $('timeout-select-lock').value=e.target.value;
+  savePrefs(); resetLockTimer();
+};
+$('timeout-select-lock').onchange=e=>{
+  lockTimeout=parseInt(e.target.value);
+  $('timeout-select-main').value=e.target.value;
+  savePrefs();
+};
+$('change-pass-btn').onclick=changePassphrase;
+
+// ── MODAL ────────────────────────────────────────────
+function openModal(){ $('modal-bg').classList.add('open'); $('modal-name').value=''; setTimeout(()=>$('modal-name').focus(),60); }
+function closeModal(){ $('modal-bg').classList.remove('open'); }
+function confirmCreate(){ const n=$('modal-name').value.trim()||'Untitled'; closeModal(); createDoc(n); }
+$('new-btn').onclick=openModal;
+$('m-cancel').onclick=closeModal;
+$('m-create').onclick=confirmCreate;
+$('modal-bg').onclick=e=>{ if(e.target===$('modal-bg')) closeModal(); };
+$('modal-name').onkeydown=e=>{ if(e.key==='Enter')confirmCreate(); if(e.key==='Escape')closeModal(); };
+
+// ── DOC LIST ─────────────────────────────────────────
+$('doc-list').onclick=e=>{
+  const del=e.target.closest('[data-del]');
+  if(del){ e.stopPropagation(); deleteDoc(del.dataset.del); return; }
+  const item=e.target.closest('[data-id]');
+  if(item) openDoc(item.dataset.id);
+};
+
+// ── TOPBAR ───────────────────────────────────────────
+$('title-input').oninput=()=>{
+  if(!currentId||!docs[currentId])return;
+  docs[currentId].name=$('title-input').value||'Untitled';
+  docs[currentId].updated=Date.now(); renderList();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{ await persistAll(); $('save-badge').textContent='saved'; },700);
+};
+$('edit-btn').onclick=()=>setMode('edit');
+$('preview-btn').onclick=()=>setMode('preview');
+$('export-btn').onclick=exportDoc;
+$('focus-btn').onclick=toggleFocus;
+$('lock-now-btn').onclick=async()=>{ await saveCurrentContent(); showLock(); };
+
+// ── EDITOR ───────────────────────────────────────────
+$('editor').oninput=()=>{ schedSave(); updateStats(); onActivity(); };
+$('editor').onkeydown=e=>{
+  onActivity();
+  if(e.key==='Tab'){
+    e.preventDefault();
+    const s=$('editor').selectionStart,end=$('editor').selectionEnd,v=$('editor').value;
+    if(e.shiftKey){ const ls=v.lastIndexOf('\n',s-1)+1; if(v.slice(ls,ls+2)==='  '){ $('editor').value=v.slice(0,ls)+v.slice(ls+2); $('editor').selectionStart=$('editor').selectionEnd=Math.max(s-2,ls); } }
+    else{ $('editor').value=v.slice(0,s)+'  '+v.slice(end); $('editor').selectionStart=$('editor').selectionEnd=s+2; }
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'){ e.preventDefault(); saveCurrentContent().then(()=>$('save-badge').textContent='saved'); }
+};
+
+// ── GLOBAL SHORTCUTS ─────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(!cryptoKey)return;
+  onActivity();
+  const mod=e.metaKey||e.ctrlKey;
+  if(mod&&e.key==='n'){ e.preventDefault(); openModal(); }
+  if(mod&&e.key==='p'){ e.preventDefault(); if(currentId) setMode(mode==='edit'?'preview':'edit'); }
+  if(mod&&e.shiftKey&&e.key==='F'){ e.preventDefault(); if(currentId) toggleFocus(); }
+  if(e.key==='Escape'&&focusMode) toggleFocus();
+  if(e.key==='Escape'&&$('modal-bg').classList.contains('open')) closeModal();
+  if(e.key==='Escape'&&$('settings-panel').classList.contains('open')) $('settings-panel').classList.remove('open');
+});
+document.addEventListener('mousemove',onActivity);
+document.addEventListener('click',onActivity);
+
+// ── LOCK SCREEN ──────────────────────────────────────
+$('lock-submit').onclick=attemptUnlock;
+$('lock-pass').onkeydown=e=>{ if(e.key==='Enter') attemptUnlock(); };
+
+// ── INIT ─────────────────────────────────────────────
+loadPrefs();
+if (!localStorage.getItem(LS_SALT_KEY)) isFirstRun=true;
+showLock();
+
+// ── SERVICE WORKER (PWA) ──────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'oblique-writer-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll([self.location.pathname])));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+</script>
+</body>
+</html>
