@@ -184,9 +184,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 body.focus-mode #sidebar,body.focus-mode #titlebar,body.focus-mode #topbar,body.focus-mode #statusbar{display:none!important}
 body.focus-mode #editor{padding:80px min(120px,12vw)}
 
-@media(max-width:600px){
-  #sidebar{width:180px;min-width:180px}
-  #editor,#preview{padding:24px 24px}
+/* HAMBURGER */
+#hamburger{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1}
+#hamburger svg{display:block}
+
+/* SIDEBAR OVERLAY */
+#sidebar-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6)}
+#sidebar-overlay.open{display:block}
+
+@media(max-width:680px){
+  #hamburger{display:flex;align-items:center}
+  #kb-hint{display:none}
+  #sidebar{
+    position:fixed;top:0;left:0;bottom:0;z-index:400;
+    width:85vw;max-width:320px;
+    transform:translateX(-100%);
+    transition:transform 0.22s ease;
+    border-right:1px solid var(--border2);
+  }
+  #sidebar.open{transform:translateX(0)}
+  #editor,#preview{padding:24px 20px}
+  #topbar{padding:6px 12px;gap:6px;flex-wrap:nowrap;overflow-x:auto}
+  #topbar::-webkit-scrollbar{display:none}
+  .sep{display:none}
+  #save-badge{display:none}
+  #title-input{font-size:13px}
+  #statusbar{padding:3px 12px;gap:12px}
+  .lock-box{width:90vw;padding:24px 20px}
+  #settings-box{width:92vw;padding:20px}
 }
 </style>
 </head>
@@ -222,11 +247,19 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
 
 <!-- TITLEBAR -->
 <div id="titlebar" style="display:none">
+  <button id="hamburger" title="Documents" aria-label="Toggle documents">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
+    </svg>
+  </button>
   <span id="app-name">Oblique Writer</span>
   <span id="titlebar-spacer"></span>
   <span id="kb-hint">Ctrl+N new · Ctrl+P preview · Ctrl+Shift+F focus · Esc exit focus</span>
   <button id="lock-now-btn">Lock</button>
 </div>
+
+<!-- SIDEBAR OVERLAY -->
+<div id="sidebar-overlay"></div>
 
 <div id="app" style="display:none">
   <div id="sidebar">
@@ -728,12 +761,7 @@ $('modal-bg').onclick=e=>{ if(e.target===$('modal-bg')) closeModal(); };
 $('modal-name').onkeydown=e=>{ if(e.key==='Enter')confirmCreate(); if(e.key==='Escape')closeModal(); };
 
 // ── DOC LIST ─────────────────────────────────────────
-$('doc-list').onclick=e=>{
-  const del=e.target.closest('[data-del]');
-  if(del){ e.stopPropagation(); deleteDoc(del.dataset.del); return; }
-  const item=e.target.closest('[data-id]');
-  if(item) openDoc(item.dataset.id);
-};
+// handled in mobile sidebar section above
 
 // ── TOPBAR ───────────────────────────────────────────
 $('title-input').oninput=()=>{
@@ -776,6 +804,31 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('mousemove',onActivity);
 document.addEventListener('click',onActivity);
+
+// ── MOBILE SIDEBAR ───────────────────────────────────
+function openSidebar() {
+  $('sidebar').classList.add('open');
+  $('sidebar-overlay').classList.add('open');
+}
+function closeSidebar() {
+  $('sidebar').classList.remove('open');
+  $('sidebar-overlay').classList.remove('open');
+}
+function isMobile() { return window.innerWidth <= 680; }
+
+$('hamburger').onclick = () => {
+  $('sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
+};
+$('sidebar-overlay').onclick = closeSidebar;
+
+// Close sidebar after selecting a doc on mobile
+const origDocListClick = $('doc-list').onclick;
+$('doc-list').onclick = e => {
+  const del = e.target.closest('[data-del]');
+  if (del) { e.stopPropagation(); deleteDoc(del.dataset.del); return; }
+  const item = e.target.closest('[data-id]');
+  if (item) { openDoc(item.dataset.id); if (isMobile()) closeSidebar(); }
+};
 
 // ── LOCK SCREEN ──────────────────────────────────────
 $('lock-submit').onclick=attemptUnlock;
