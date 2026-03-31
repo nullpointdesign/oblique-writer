@@ -17,26 +17,17 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0e0e0c;
-  --surface:#161614;
-  --surface2:#1e1e1b;
-  --surface3:#252520;
-  --border:#2a2a26;
-  --border2:#3a3a35;
-  --text:#e0dbd0;
-  --text2:#a09890;
-  --text3:#787068;
-  --accent:#e87830;
-  --accent2:#c05f18;
-  --danger:#c85050;
-  --editor-font:'Courier New',Courier,monospace;
-  --editor-size:14px;
+  --bg:#0e0e0c;--surface:#161614;--surface2:#1e1e1b;--surface3:#252520;
+  --border:#2a2a26;--border2:#3a3a35;
+  --text:#e0dbd0;--text2:#a09890;--text3:#787068;
+  --accent:#e87830;--accent2:#c05f18;--danger:#c85050;
+  --editor-font:'Courier New',Courier,monospace;--editor-size:14px;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
 }
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column}
 
-/* ── LOCK SCREEN ── */
+/* LOCK */
 #lock-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}
 #lock-screen.hidden{display:none}
 .lock-logo{font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:3rem}
@@ -53,7 +44,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #lock-timeout-wrap{margin-top:2rem;display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text3);letter-spacing:0.06em}
 #lock-timeout-wrap select{background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:3px 6px;border-radius:3px;font-size:10px;font-family:var(--sans);outline:none;cursor:pointer}
 
-/* ── TITLEBAR ── */
+/* TITLEBAR */
 #titlebar{height:36px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;user-select:none}
 #app-name{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);font-weight:400}
 #titlebar-spacer{flex:1}
@@ -61,10 +52,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #lock-now-btn{background:none;border:1px solid var(--border2);color:var(--text3);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer;font-family:var(--sans);letter-spacing:0.08em;transition:all 0.15s}
 #lock-now-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-/* ── LAYOUT ── */
+/* LAYOUT */
 #app{display:flex;flex:1;overflow:hidden;min-height:0}
 
-/* ── SIDEBAR ── */
+/* SIDEBAR */
 #sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 #sidebar-header{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 #sidebar-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3)}
@@ -86,7 +77,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #sidebar-foot{padding:8px 12px;border-top:1px solid var(--border)}
 #doc-count{font-size:10px;color:var(--text3)}
 
-/* ── MAIN ── */
+/* MAIN */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 #topbar{padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
 #title-input{background:none;border:none;color:var(--text);font-size:14px;font-weight:400;flex:1;outline:none;font-family:var(--sans);min-width:0}
@@ -97,7 +88,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .tb-btn.on{color:var(--accent)}
 #save-badge{font-size:10px;color:var(--text3);letter-spacing:0.06em;min-width:48px;text-align:right}
 
-/* EDITOR */
+/* EDITOR WRAP */
 #editor-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative}
 #editor{flex:1;width:100%;background:var(--bg);color:var(--text);border:none;outline:none;resize:none;font-family:var(--editor-font);font-size:var(--editor-size);line-height:1.85;padding:44px 72px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;caret-color:var(--accent);tab-size:2}
 #editor::placeholder{color:var(--text3)}
@@ -126,19 +117,78 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #preview th,#preview td{border:1px solid var(--border);padding:6px 10px;text-align:left}
 #preview th{background:var(--surface2);color:var(--text2);font-weight:400;font-size:11px;letter-spacing:0.1em;text-transform:uppercase}
 
+/* CORNELL LAYOUT */
+#cornell-wrap{flex:1;display:none;overflow:hidden}
+#cornell-wrap.active{display:flex}
+
+/* GUTTER */
+#cornell-gutter{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;position:relative}
+#cornell-gutter-inner{flex:1;overflow-y:auto;position:relative;min-height:0}
+#cornell-gutter-inner::-webkit-scrollbar{width:3px}
+#cornell-gutter-inner::-webkit-scrollbar-thumb{background:var(--border2)}
+#gutter-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;text-align:center;line-height:1.8;pointer-events:none;transition:opacity 0.3s;width:180px}
+#gutter-hint.hidden{opacity:0;pointer-events:none}
+
+/* ANNOTATION CARDS */
+.ann-card{position:absolute;left:0;right:0;padding:10px 12px 10px 14px;border-bottom:1px solid var(--border);transition:background 0.15s;cursor:default}
+.ann-card:hover{background:var(--surface2)}
+.ann-card.focused{background:var(--surface3);border-left:2px solid var(--accent);padding-left:12px}
+.ann-anchor-label{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ann-anchor-label:hover{color:var(--accent)}
+.ann-textarea{font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--editor-font);width:100%;background:none;border:none;outline:none;resize:none;min-height:52px;caret-color:var(--accent)}
+.ann-textarea::placeholder{color:var(--text3)}
+.ann-del{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;opacity:0;transition:opacity 0.15s;padding:2px 4px;border-radius:2px;line-height:1}
+.ann-card:hover .ann-del{opacity:1}
+.ann-del:hover{color:var(--danger)}
+
+/* CONTENTEDITABLE CORNELL EDITOR */
+#cornell-editor-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#cornell-ce{
+  flex:1;outline:none;background:var(--bg);color:var(--text);
+  font-family:var(--editor-font);font-size:var(--editor-size);
+  line-height:1.85;padding:44px 48px;overflow-y:auto;
+  white-space:pre-wrap;word-wrap:break-word;
+  caret-color:var(--accent);tab-size:2;
+}
+#cornell-ce:empty::before{content:attr(data-placeholder);color:var(--text3);pointer-events:none}
+#cornell-ce::-webkit-scrollbar{width:4px}
+#cornell-ce::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ANCHOR HIGHLIGHT — option C: tint + underline */
+.ann-mark{
+  background:rgba(232,120,48,0.12);
+  border-bottom:2px solid var(--accent);
+  border-radius:2px 2px 0 0;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.ann-mark:hover{background:rgba(232,120,48,0.22)}
+.ann-mark.focused{background:rgba(232,120,48,0.25)}
+
+/* FLOAT ANNOTATE BUTTON */
+#ann-float-btn{
+  position:fixed;z-index:600;display:none;
+  background:var(--surface2);border:1px solid var(--accent);
+  color:var(--accent);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+  font-family:var(--sans);padding:5px 12px;border-radius:3px;cursor:pointer;
+  box-shadow:0 2px 12px rgba(0,0,0,0.5);transition:background 0.15s;
+  white-space:nowrap;
+}
+#ann-float-btn:hover{background:rgba(232,120,48,0.15)}
+
 /* EMPTY STATE */
 #empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:10px}
 #empty .e-title{font-size:12px;letter-spacing:0.15em;text-transform:uppercase}
 #empty .e-hint{font-size:11px;opacity:0.7}
 
-/* STATUS BAR */
+/* STATUSBAR */
 #statusbar{padding:4px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:18px;background:var(--surface);flex-shrink:0}
 .stat{font-size:10px;color:var(--text3);letter-spacing:0.06em}
 
 /* SETTINGS */
 #settings-panel{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
 #settings-panel.open{display:flex}
-#settings-box{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:28px 32px;width:380px;display:flex;flex-direction:column;gap:0}
+#settings-box{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:28px 32px;width:380px;display:flex;flex-direction:column;gap:0;max-height:90vh;overflow-y:auto}
 #settings-box h3{font-size:13px;font-weight:400;color:var(--text);letter-spacing:0.08em;margin-bottom:20px}
 .settings-section{border-top:1px solid var(--border);padding:16px 0;display:flex;flex-direction:column;gap:14px}
 .settings-section-title{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
@@ -152,8 +202,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .settings-close{background:none;border:1px solid var(--border2);color:var(--text2);padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--sans);transition:all 0.15s}
 .settings-close:hover{background:var(--surface3);color:var(--text)}
 .setting-note{font-size:10px;color:var(--text3);line-height:1.7;letter-spacing:0.04em}
-
-/* CHANGE PASSWORD */
 .change-pass-fields{display:flex;flex-direction:column;gap:8px}
 .change-pass-fields input{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;font-family:var(--sans);outline:none}
 .change-pass-fields input:focus{border-color:var(--accent)}
@@ -177,34 +225,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 .m-btn:hover{background:var(--surface3);color:var(--text)}
 .m-btn.primary{border-color:var(--accent);color:var(--accent)}
 .m-btn.primary:hover{background:rgba(232,120,48,0.1)}
-
 #file-input{display:none}
+
+/* HAMBURGER */
+#hamburger{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1}
+#sidebar-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6)}
+#sidebar-overlay.open{display:block}
 
 /* FOCUS MODE */
 body.focus-mode #sidebar,body.focus-mode #titlebar,body.focus-mode #topbar,body.focus-mode #statusbar{display:none!important}
 body.focus-mode #editor{padding:80px min(120px,12vw)}
-
-/* HAMBURGER */
-#hamburger{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1}
-#hamburger svg{display:block}
-
-/* SIDEBAR OVERLAY */
-#sidebar-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6)}
-#sidebar-overlay.open{display:block}
+body.focus-mode #cornell-ce{padding:80px min(80px,8vw)}
+body.focus-mode #cornell-gutter{display:none}
 
 @media(max-width:680px){
   #hamburger{display:flex;align-items:center}
   #kb-hint{display:none}
-  #sidebar{
-    position:fixed;top:0;left:0;bottom:0;z-index:400;
-    width:85vw;max-width:320px;
-    transform:translateX(-100%);
-    transition:transform 0.22s ease;
-    border-right:1px solid var(--border2);
-  }
+  #ann-btn{display:none!important}
+  #sidebar{position:fixed;top:0;left:0;bottom:0;z-index:400;width:85vw;max-width:320px;transform:translateX(-100%);transition:transform 0.22s ease;border-right:1px solid var(--border2)}
   #sidebar.open{transform:translateX(0)}
   #editor,#preview{padding:24px 20px}
-  #topbar{padding:6px 12px;gap:6px;flex-wrap:nowrap;overflow-x:auto}
+  #topbar{padding:6px 12px;gap:6px;overflow-x:auto}
   #topbar::-webkit-scrollbar{display:none}
   .sep{display:none}
   #save-badge{display:none}
@@ -212,12 +253,12 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
   #statusbar{padding:3px 12px;gap:12px}
   .lock-box{width:90vw;padding:24px 20px}
   #settings-box{width:92vw;padding:20px}
+  #cornell-gutter{display:none!important}
 }
 </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
 <div id="lock-screen">
   <div class="lock-logo">Oblique Writer</div>
   <div class="lock-box">
@@ -245,20 +286,18 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
   </div>
 </div>
 
-<!-- TITLEBAR -->
 <div id="titlebar" style="display:none">
-  <button id="hamburger" title="Documents" aria-label="Toggle documents">
+  <button id="hamburger" aria-label="Toggle documents">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
     </svg>
   </button>
   <span id="app-name">Oblique Writer</span>
   <span id="titlebar-spacer"></span>
-  <span id="kb-hint">Ctrl+N new · Ctrl+P preview · Ctrl+Shift+F focus · Esc exit focus</span>
+  <span id="kb-hint">Ctrl+N new · Ctrl+P preview · Ctrl+M annotate selection · Ctrl+Shift+F focus</span>
   <button id="lock-now-btn">Lock</button>
 </div>
 
-<!-- SIDEBAR OVERLAY -->
 <div id="sidebar-overlay"></div>
 
 <div id="app" style="display:none">
@@ -268,9 +307,7 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
       <button id="new-btn" title="New document (Ctrl+N)">+</button>
     </div>
     <div id="doc-list"></div>
-    <div id="sidebar-foot">
-      <div id="doc-count">0 documents</div>
-    </div>
+    <div id="sidebar-foot"><div id="doc-count">0 documents</div></div>
   </div>
 
   <div id="main">
@@ -279,6 +316,7 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
       <div class="sep"></div>
       <button class="tb-btn on" id="edit-btn">Edit</button>
       <button class="tb-btn" id="preview-btn">Preview</button>
+      <button class="tb-btn" id="ann-btn">Annotate</button>
       <div class="sep"></div>
       <button class="tb-btn" id="export-btn">Export</button>
       <button class="tb-btn" id="import-btn">Import</button>
@@ -287,14 +325,27 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
       <button class="tb-btn" id="settings-btn">Settings</button>
       <span id="save-badge">saved</span>
     </div>
+
     <div id="editor-wrap">
       <div id="empty">
         <div class="e-title">No document open</div>
         <div class="e-hint">Press Ctrl+N or click + to create one</div>
       </div>
-      <textarea id="editor" style="display:none" placeholder="Start writing…" spellcheck="true" autocorrect="on"></textarea>
+      <textarea id="editor" style="display:none" placeholder="Start writing…" spellcheck="true"></textarea>
       <div id="preview"></div>
+
+      <div id="cornell-wrap">
+        <div id="cornell-gutter">
+          <div id="cornell-gutter-inner">
+            <div id="gutter-hint">Select text in the editor,<br>then press Ctrl+M<br>or click + Annotate</div>
+          </div>
+        </div>
+        <div id="cornell-editor-wrap">
+          <div id="cornell-ce" contenteditable="true" spellcheck="true" data-placeholder="Start writing…"></div>
+        </div>
+      </div>
     </div>
+
     <div id="statusbar" style="display:none">
       <span class="stat" id="s-words">0 words</span>
       <span class="stat" id="s-chars">0 chars</span>
@@ -304,11 +355,11 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
   </div>
 </div>
 
-<!-- SETTINGS PANEL -->
+<button id="ann-float-btn">+ Annotate</button>
+
 <div id="settings-panel">
   <div id="settings-box">
     <h3>Settings</h3>
-
     <div class="settings-section">
       <div class="settings-section-title">Editor</div>
       <div class="setting-row">
@@ -326,7 +377,6 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
         <span class="setting-value" id="size-val">14px</span>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Security</div>
       <div class="setting-row">
@@ -351,20 +401,13 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
         </div>
       </div>
     </div>
-
     <div class="settings-section">
-      <div class="setting-note">
-        Documents encrypted with AES-256-GCM · PBKDF2 key derivation (200,000 iterations) · Passphrase never stored · Exports are plain text · No recovery if passphrase forgotten
-      </div>
+      <div class="setting-note">AES-256-GCM encryption · PBKDF2 200,000 iterations · Passphrase never stored · Exports are plain text · No recovery if passphrase forgotten</div>
     </div>
-
-    <div class="settings-foot">
-      <button class="settings-close" id="settings-close">Done</button>
-    </div>
+    <div class="settings-foot"><button class="settings-close" id="settings-close">Done</button></div>
   </div>
 </div>
 
-<!-- NEW DOC MODAL -->
 <div id="modal-bg">
   <div id="modal">
     <h3>New document</h3>
@@ -379,275 +422,361 @@ body.focus-mode #editor{padding:80px min(120px,12vw)}
 <input type="file" id="file-input" accept=".md,.txt,.markdown">
 
 <script>
-const LS_KEY      = 'oblique_writer_v2';
-const LS_SALT_KEY = 'oblique_writer_salt';
-const LS_PREFS    = 'oblique_writer_prefs';
+const LS_KEY='oblique_writer_v2', LS_SALT_KEY='oblique_writer_salt', LS_PREFS='oblique_writer_prefs';
+const FONTS={courier:"'Courier New',Courier,monospace",georgia:"Georgia,'Times New Roman',serif",crimson:"'Crimson Pro',Georgia,serif",sourcecode:"'Source Code Pro','Courier New',monospace"};
 
-const FONTS = {
-  courier:    "'Courier New', Courier, monospace",
-  georgia:    "Georgia, 'Times New Roman', serif",
-  crimson:    "'Crimson Pro', Georgia, serif",
-  sourcecode: "'Source Code Pro', 'Courier New', monospace",
-};
+let cryptoKey=null, docs={}, currentId=null, mode='edit';
+let saveTimer=null, focusMode=false, lockTimeout=5, lockTimer=null, isFirstRun=false;
+let editorFont='courier', editorSize=14;
+let annotations=[], floatSelection=null;
 
-let cryptoKey   = null;
-let docs        = {};
-let currentId   = null;
-let mode        = 'edit';
-let saveTimer   = null;
-let focusMode   = false;
-let lockTimeout = 5;
-let lockTimer   = null;
-let isFirstRun  = false;
-let editorFont  = 'courier';
-let editorSize  = 14;
-
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
 // ── PREFS ────────────────────────────────────────────
-function loadPrefs() {
-  try {
-    const p = JSON.parse(localStorage.getItem(LS_PREFS) || '{}');
-    lockTimeout = p.lockTimeout ?? 5;
-    editorFont  = p.editorFont  || 'courier';
-    editorSize  = p.editorSize  || 14;
-  } catch(e) {}
-  $('timeout-select-lock').value = String(lockTimeout);
-  $('timeout-select-main').value = String(lockTimeout);
-  $('font-select').value         = editorFont;
-  $('size-slider').value         = editorSize;
-  $('size-val').textContent      = editorSize + 'px';
+function loadPrefs(){
+  try{ const p=JSON.parse(localStorage.getItem(LS_PREFS)||'{}'); lockTimeout=p.lockTimeout??5; editorFont=p.editorFont||'courier'; editorSize=p.editorSize||14; } catch(e){}
+  $('timeout-select-lock').value=String(lockTimeout);
+  $('timeout-select-main').value=String(lockTimeout);
+  $('font-select').value=editorFont;
+  $('size-slider').value=editorSize;
+  $('size-val').textContent=editorSize+'px';
   applyFont();
 }
-
-function savePrefs() {
-  localStorage.setItem(LS_PREFS, JSON.stringify({ lockTimeout, editorFont, editorSize }));
-}
-
-function applyFont() {
-  document.documentElement.style.setProperty('--editor-font', FONTS[editorFont]);
-  document.documentElement.style.setProperty('--editor-size', editorSize + 'px');
+function savePrefs(){ localStorage.setItem(LS_PREFS,JSON.stringify({lockTimeout,editorFont,editorSize})); }
+function applyFont(){
+  document.documentElement.style.setProperty('--editor-font',FONTS[editorFont]);
+  document.documentElement.style.setProperty('--editor-size',editorSize+'px');
 }
 
 // ── CRYPTO ───────────────────────────────────────────
-function bufToHex(buf) {
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-function hexToBuf(hex) {
-  const b = new Uint8Array(hex.length/2);
-  for (let i=0;i<b.length;i++) b[i]=parseInt(hex.slice(i*2,i*2+2),16);
-  return b;
-}
-async function getSalt() {
-  let s = localStorage.getItem(LS_SALT_KEY);
-  if (!s) {
-    s = bufToHex(crypto.getRandomValues(new Uint8Array(32)));
-    localStorage.setItem(LS_SALT_KEY, s);
-    isFirstRun = true;
-  }
-  return hexToBuf(s);
-}
-async function deriveKey(pass, salt) {
-  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    {name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'},
-    raw, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']
-  );
-}
-async function encryptText(pt, key) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(pt));
-  return bufToHex(iv)+':'+bufToHex(ct);
-}
-async function decryptText(ct, key) {
-  const [ivH,ctH] = ct.split(':');
-  const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv:hexToBuf(ivH)}, key, hexToBuf(ctH));
-  return new TextDecoder().decode(pt);
-}
+function b2h(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function h2b(hex){ const b=new Uint8Array(hex.length/2); for(let i=0;i<b.length;i++) b[i]=parseInt(hex.slice(i*2,i*2+2),16); return b; }
+async function getSalt(){ let s=localStorage.getItem(LS_SALT_KEY); if(!s){ s=b2h(crypto.getRandomValues(new Uint8Array(32))); localStorage.setItem(LS_SALT_KEY,s); isFirstRun=true; } return h2b(s); }
+async function deriveKey(p,salt){ const r=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},r,{name:'AES-GCM',length:256},false,['encrypt','decrypt']); }
+async function encTxt(pt,k){ const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(pt)); return b2h(iv)+':'+b2h(ct); }
+async function decTxt(ct,k){ const[ih,ch]=ct.split(':'),pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:h2b(ih)},k,h2b(ch)); return new TextDecoder().decode(pt); }
 
 // ── STORAGE ──────────────────────────────────────────
-async function persistAll() {
-  if (!cryptoKey) return;
-  localStorage.setItem(LS_KEY, await encryptText(JSON.stringify(docs), cryptoKey));
-}
-async function hydrateAll() {
-  const ct = localStorage.getItem(LS_KEY);
-  if (!ct) { docs={}; return true; }
-  try { docs=JSON.parse(await decryptText(ct,cryptoKey)); return true; }
-  catch(e) { return false; }
-}
+async function persistAll(){ if(!cryptoKey) return; localStorage.setItem(LS_KEY,await encTxt(JSON.stringify(docs),cryptoKey)); }
+async function hydrateAll(){ const ct=localStorage.getItem(LS_KEY); if(!ct){ docs={}; return true; } try{ docs=JSON.parse(await decTxt(ct,cryptoKey)); return true; } catch(e){ return false; } }
 
 // ── LOCK ─────────────────────────────────────────────
-function showLock(msg) {
-  cryptoKey=null; docs={}; currentId=null; clearLockTimer();
-  $('titlebar').style.display='none';
-  $('app').style.display='none';
+function showLock(msg){
+  cryptoKey=null; docs={}; currentId=null; annotations=[]; clearLockTimer();
+  $('titlebar').style.display='none'; $('app').style.display='none';
   $('lock-screen').classList.remove('hidden');
-  $('lock-pass').value='';
-  $('lock-error').textContent=msg||'';
+  $('lock-pass').value=''; $('lock-error').textContent=msg||'';
   $('lock-title').innerHTML=isFirstRun?'Choose a <span>passphrase</span>':'Enter passphrase to <span>unlock</span>';
   $('lock-hint').style.display=isFirstRun?'block':'none';
   setTimeout(()=>$('lock-pass').focus(),100);
 }
-function hideLock() {
-  $('lock-screen').classList.add('hidden');
-  $('titlebar').style.display='flex';
-  $('app').style.display='flex';
-  resetLockTimer();
-}
-async function attemptUnlock() {
-  const pass=$('lock-pass').value;
-  if (!pass) { $('lock-error').textContent='Passphrase required.'; return; }
-  $('lock-submit').disabled=true;
-  $('lock-submit').textContent='Unlocking…';
-  $('lock-error').textContent='';
-  try {
-    const salt=await getSalt();
-    cryptoKey=await deriveKey(pass,salt);
+function hideLock(){ $('lock-screen').classList.add('hidden'); $('titlebar').style.display='flex'; $('app').style.display='flex'; resetLockTimer(); }
+async function attemptUnlock(){
+  const pass=$('lock-pass').value; if(!pass){ $('lock-error').textContent='Passphrase required.'; return; }
+  $('lock-submit').disabled=true; $('lock-submit').textContent='Unlocking…'; $('lock-error').textContent='';
+  try{
+    const salt=await getSalt(); cryptoKey=await deriveKey(pass,salt);
     const ok=await hydrateAll();
-    if (!ok) {
-      cryptoKey=null;
-      $('lock-error').textContent='Wrong passphrase.';
-      $('lock-pass').value='';
-      setTimeout(()=>$('lock-pass').focus(),50);
-    } else {
-      isFirstRun=false;
-      hideLock();
-      renderList();
-      const recent=Object.keys(docs).sort((a,b)=>docs[b].updated-docs[a].updated)[0];
-      if (recent) openDoc(recent);
-    }
-  } catch(e) { $('lock-error').textContent='Error: '+e.message; cryptoKey=null; }
-  $('lock-submit').disabled=false;
-  $('lock-submit').textContent='Unlock';
+    if(!ok){ cryptoKey=null; $('lock-error').textContent='Wrong passphrase.'; $('lock-pass').value=''; setTimeout(()=>$('lock-pass').focus(),50); }
+    else{ isFirstRun=false; hideLock(); renderList(); const r=Object.keys(docs).sort((a,b)=>docs[b].updated-docs[a].updated)[0]; if(r) openDoc(r); }
+  } catch(e){ $('lock-error').textContent='Error: '+e.message; cryptoKey=null; }
+  $('lock-submit').disabled=false; $('lock-submit').textContent='Unlock';
 }
 
-// ── CHANGE PASSWORD ──────────────────────────────────
-async function changePassphrase() {
-  const curr=$('cp-current').value;
-  const next=$('cp-new').value;
-  const conf=$('cp-confirm').value;
-  const status=$('change-pass-status');
-  status.className='';
-  status.textContent='';
-  if (!curr||!next||!conf) { status.className='err'; status.textContent='All fields required.'; return; }
-  if (next!==conf) { status.className='err'; status.textContent='New passphrases do not match.'; return; }
-  if (next.length < 6) { status.className='err'; status.textContent='Passphrase too short.'; return; }
-  $('change-pass-btn').disabled=true;
-  $('change-pass-btn').textContent='Working…';
-  try {
-    // Verify current passphrase
-    const salt=hexToBuf(localStorage.getItem(LS_SALT_KEY));
+// ── CHANGE PASSPHRASE ────────────────────────────────
+async function changePassphrase(){
+  const curr=$('cp-current').value, next=$('cp-new').value, conf=$('cp-confirm').value;
+  const st=$('change-pass-status'); st.className=''; st.textContent='';
+  if(!curr||!next||!conf){ st.className='err'; st.textContent='All fields required.'; return; }
+  if(next!==conf){ st.className='err'; st.textContent='New passphrases do not match.'; return; }
+  if(next.length<6){ st.className='err'; st.textContent='Passphrase too short.'; return; }
+  $('change-pass-btn').disabled=true; $('change-pass-btn').textContent='Working…';
+  try{
+    const salt=h2b(localStorage.getItem(LS_SALT_KEY));
     const testKey=await deriveKey(curr,salt);
     const ct=localStorage.getItem(LS_KEY);
-    if (ct) {
-      try { await decryptText(ct,testKey); }
-      catch(e) { status.className='err'; status.textContent='Current passphrase is wrong.'; $('change-pass-btn').disabled=false; $('change-pass-btn').textContent='Change passphrase'; return; }
-    }
-    // Derive new key with same salt, re-encrypt
-    const newKey=await deriveKey(next,salt);
-    cryptoKey=newKey;
-    await persistAll();
-    status.className='ok'; status.textContent='Passphrase changed.';
+    if(ct){ try{ await decTxt(ct,testKey); } catch(e){ st.className='err'; st.textContent='Current passphrase is wrong.'; $('change-pass-btn').disabled=false; $('change-pass-btn').textContent='Change passphrase'; return; } }
+    cryptoKey=await deriveKey(next,salt); await persistAll();
+    st.className='ok'; st.textContent='Passphrase changed.';
     $('cp-current').value=''; $('cp-new').value=''; $('cp-confirm').value='';
-  } catch(e) { status.className='err'; status.textContent='Error: '+e.message; }
-  $('change-pass-btn').disabled=false;
-  $('change-pass-btn').textContent='Change passphrase';
+  } catch(e){ st.className='err'; st.textContent='Error: '+e.message; }
+  $('change-pass-btn').disabled=false; $('change-pass-btn').textContent='Change passphrase';
 }
 
 // ── INACTIVITY ───────────────────────────────────────
-function resetLockTimer() {
-  clearLockTimer();
-  if (lockTimeout===0) return;
-  lockTimer=setTimeout(async()=>{ await saveCurrentContent(); showLock(); }, lockTimeout*60*1000);
-}
-function clearLockTimer() { if(lockTimer){clearTimeout(lockTimer);lockTimer=null;} }
-function onActivity() { if(cryptoKey) resetLockTimer(); }
+function resetLockTimer(){ clearLockTimer(); if(lockTimeout===0) return; lockTimer=setTimeout(async()=>{ await saveCurrentContent(); showLock(); },lockTimeout*60*1000); }
+function clearLockTimer(){ if(lockTimer){ clearTimeout(lockTimer); lockTimer=null; } }
+function onActivity(){ if(cryptoKey) resetLockTimer(); }
 
 // ── UTILS ────────────────────────────────────────────
-function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function wordCount(t){ return t.trim()?t.trim().split(/\s+/).length:0; }
-function readingTime(w){ const m=Math.ceil(w/200); return m<1?'':`${m} min read`; }
+function wc(t){ return t.trim()?t.trim().split(/\s+/).length:0; }
+function rt(w){ const m=Math.ceil(w/200); return m<1?'':`${m} min read`; }
+function isMobile(){ return window.innerWidth<=680; }
+
+// ── CONTENT HELPERS ──────────────────────────────────
+// Get plain text from contenteditable, preserving newlines
+function ceToText(el){
+  let text='';
+  el.childNodes.forEach(node=>{
+    if(node.nodeType===3) text+=node.textContent;
+    else if(node.nodeName==='BR') text+='\n';
+    else if(node.nodeName==='DIV'||node.nodeName==='P'){
+      if(text && !text.endsWith('\n')) text+='\n';
+      text+=node.textContent;
+    } else text+=node.textContent;
+  });
+  return text;
+}
+
+// Set contenteditable content with annotation marks
+function ceFromText(el, text, anns){
+  if(!anns||anns.length===0){ el.textContent=text; return; }
+  // Build content with marks
+  // Sort annotations by position in text
+  let html=esc(text);
+  // Apply marks from end to start to preserve offsets
+  const marked=[];
+  anns.forEach(ann=>{
+    const anchor=ann.anchor.slice(0,60);
+    const escaped=esc(anchor);
+    const idx=html.indexOf(escaped);
+    if(idx>=0) marked.push({idx,len:escaped.length,id:ann.id,anchor:escaped});
+  });
+  marked.sort((a,b)=>b.idx-a.idx);
+  marked.forEach(m=>{
+    const before=html.slice(0,m.idx);
+    const match=html.slice(m.idx,m.idx+m.len);
+    const after=html.slice(m.idx+m.len);
+    html=before+`<span class="ann-mark" data-ann="${m.id}">${match}</span>`+after;
+  });
+  // Convert newlines to divs for contenteditable
+  const lines=html.split('\n');
+  el.innerHTML=lines.map((l,i)=>i===0?l:`<div>${l||'<br>'}</div>`).join('');
+}
 
 // ── DOCS ─────────────────────────────────────────────
-function createDoc(name) {
+function createDoc(name){
   const id=uid();
-  docs[id]={id,name:name||'Untitled',content:'',created:Date.now(),updated:Date.now()};
+  docs[id]={id,name:name||'Untitled',content:'',annotations:[],cornellMode:false,created:Date.now(),updated:Date.now()};
   persistAll(); renderList(); openDoc(id);
-  setTimeout(()=>$('editor').focus(),80);
 }
-function openDoc(id) {
-  if (!docs[id]) return;
+
+function openDoc(id){
+  if(!docs[id]) return;
   currentId=id;
   const d=docs[id];
+  if(!d.annotations) d.annotations=[];
+  annotations=[...d.annotations];
   $('topbar').style.display='flex';
   $('statusbar').style.display='flex';
   $('empty').style.display='none';
   $('title-input').value=d.name;
   $('editor').value=d.content;
-  $('editor').style.display=mode==='edit'?'block':'none';
-  $('preview').style.display=mode==='preview'?'block':'none';
-  if (mode==='preview') doPreview();
-  updateStats(); renderList();
+  const m=d.cornellMode&&!isMobile()?'cornell':'edit';
+  setMode(m);
+  updateStats();
+  renderList();
 }
-async function saveCurrentContent() {
-  if (!currentId||!docs[currentId]||!cryptoKey) return;
-  docs[currentId].content=$('editor').value;
+
+async function saveCurrentContent(){
+  if(!currentId||!docs[currentId]||!cryptoKey) return;
+  const content=mode==='cornell'?ceToText($('cornell-ce')):$('editor').value;
+  docs[currentId].content=content;
+  docs[currentId].annotations=[...annotations];
+  docs[currentId].cornellMode=(mode==='cornell');
   docs[currentId].updated=Date.now();
-  await persistAll(); renderList();
+  await persistAll();
+  renderList();
 }
-function deleteDoc(id) {
-  if (!confirm(`Delete "${docs[id]?.name}"?`)) return;
+
+function deleteDoc(id){
+  if(!confirm(`Delete "${docs[id]?.name}"?`)) return;
   delete docs[id]; persistAll();
-  if (currentId===id) {
-    currentId=null;
-    $('topbar').style.display='none';
-    $('statusbar').style.display='none';
-    $('editor').style.display='none';
-    $('preview').style.display='none';
+  if(currentId===id){
+    currentId=null; annotations=[];
+    $('topbar').style.display='none'; $('statusbar').style.display='none';
+    $('editor').style.display='none'; $('preview').style.display='none';
+    $('cornell-wrap').classList.remove('active');
     $('empty').style.display='flex';
   }
   renderList();
 }
-function renderList() {
+
+function renderList(){
   const ids=Object.keys(docs).sort((a,b)=>docs[b].updated-docs[a].updated);
   $('doc-list').innerHTML=ids.length
-    ?ids.map(id=>{
-        const d=docs[id],w=wordCount(d.content);
-        return `<div class="doc-item${id===currentId?' active':''}" data-id="${id}">
-          <div class="doc-info">
-            <div class="doc-name">${esc(d.name)}</div>
-            <div class="doc-meta">${w.toLocaleString()} words</div>
-          </div>
-          <button class="doc-del" data-del="${id}" title="Delete">✕</button>
-        </div>`;
-      }).join('')
+    ?ids.map(id=>{ const d=docs[id],w=wc(d.content); return `<div class="doc-item${id===currentId?' active':''}" data-id="${id}"><div class="doc-info"><div class="doc-name">${esc(d.name)}</div><div class="doc-meta">${w.toLocaleString()} words${d.annotations&&d.annotations.length?' · '+d.annotations.length+' notes':''}</div></div><button class="doc-del" data-del="${id}">✕</button></div>`; }).join('')
     :'<div style="padding:24px 12px;font-size:11px;color:var(--text3);text-align:center">No documents yet</div>';
   $('doc-count').textContent=`${ids.length} document${ids.length!==1?'s':''}`;
 }
-function updateStats() {
-  const txt=$('editor').value,w=wordCount(txt);
+
+function updateStats(){
+  const txt=mode==='cornell'?ceToText($('cornell-ce')):$('editor').value;
+  const w=wc(txt);
   $('s-words').textContent=`${w.toLocaleString()} words`;
   $('s-chars').textContent=`${txt.length.toLocaleString()} chars`;
   $('s-lines').textContent=`${(txt?txt.split('\n').length:0).toLocaleString()} lines`;
-  $('s-reading').textContent=readingTime(w);
+  $('s-reading').textContent=rt(w);
 }
-function setMode(m) {
+
+// ── MODE ─────────────────────────────────────────────
+function setMode(m){
+  // sync content between editors when switching
+  if(mode==='edit'&&m==='cornell'){ ceFromText($('cornell-ce'),$('editor').value,annotations); }
+  if(mode==='cornell'&&m==='edit'){ $('editor').value=ceToText($('cornell-ce')); }
   mode=m;
   $('edit-btn').classList.toggle('on',m==='edit');
   $('preview-btn').classList.toggle('on',m==='preview');
+  $('ann-btn').classList.toggle('on',m==='cornell');
   $('editor').style.display=m==='edit'?'block':'none';
   $('preview').style.display=m==='preview'?'block':'none';
-  if (m==='preview') doPreview();
-  if (m==='edit') setTimeout(()=>$('editor').focus(),50);
+  $('cornell-wrap').classList.toggle('active',m==='cornell');
+  if(m==='preview'){ $('editor').value=ceToText($('cornell-ce')); doPreview(); }
+  if(m==='edit') setTimeout(()=>$('editor').focus(),50);
+  if(m==='cornell'){ renderGutter(); setTimeout(()=>$('cornell-ce').focus(),50); }
 }
+
+// ── ANNOTATIONS ──────────────────────────────────────
+function addAnnotation(anchor, note=''){
+  const ann={id:uid(), anchor:anchor.trim().slice(0,120), note};
+  annotations.push(ann);
+  // wrap anchor text in mark span
+  wrapAnchorInCE(ann);
+  renderGutter();
+  schedSave();
+  // focus the new card's textarea
+  setTimeout(()=>{
+    const ta=document.querySelector(`.ann-card[data-ann="${ann.id}"] .ann-textarea`);
+    if(ta) ta.focus();
+  },80);
+}
+
+function wrapAnchorInCE(ann){
+  const ce=$('cornell-ce');
+  // Re-render CE content with all current annotations
+  ceFromText(ce, ceToText(ce), annotations);
+}
+
+function deleteAnnotation(id){
+  annotations=annotations.filter(a=>a.id!==id);
+  // re-render CE to remove mark
+  ceFromText($('cornell-ce'), ceToText($('cornell-ce')), annotations);
+  renderGutter();
+  schedSave();
+}
+
+function focusAnnotation(id){
+  // highlight mark
+  document.querySelectorAll('.ann-mark').forEach(m=>m.classList.toggle('focused',m.dataset.ann===id));
+  // highlight card
+  document.querySelectorAll('.ann-card').forEach(c=>c.classList.toggle('focused',c.dataset.ann===id));
+  // scroll gutter to card
+  const card=document.querySelector(`.ann-card[data-ann="${id}"]`);
+  if(card) card.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function renderGutter(){
+  const inner=$('cornell-gutter-inner');
+  inner.querySelectorAll('.ann-card').forEach(el=>el.remove());
+  $('gutter-hint').classList.toggle('hidden', annotations.length>0);
+
+  const ce=$('cornell-ce');
+  const ceRect=ce.getBoundingClientRect();
+
+  annotations.forEach(ann=>{
+    const card=document.createElement('div');
+    card.className='ann-card';
+    card.dataset.ann=ann.id;
+
+    // find vertical position of mark in CE
+    const mark=ce.querySelector(`.ann-mark[data-ann="${ann.id}"]`);
+    let topPx=inner.scrollTop+24;
+    if(mark){
+      const mRect=mark.getBoundingClientRect();
+      topPx=(mRect.top-ceRect.top)+ce.scrollTop;
+    }
+    card.style.top=Math.max(0,topPx)+'px';
+
+    const preview=ann.anchor.length>44?ann.anchor.slice(0,44)+'…':ann.anchor;
+    card.innerHTML=`<div class="ann-anchor-label" title="${esc(ann.anchor)}">${esc(preview)}</div><textarea class="ann-textarea" placeholder="Your note…" rows="3"></textarea><button class="ann-del" title="Delete">✕</button>`;
+    card.querySelector('.ann-textarea').value=ann.note;
+
+    card.querySelector('.ann-textarea').addEventListener('input',e=>{ ann.note=e.target.value; schedSave(); });
+    card.querySelector('.ann-textarea').addEventListener('focus',()=>focusAnnotation(ann.id));
+    card.querySelector('.ann-textarea').addEventListener('blur',()=>{ document.querySelectorAll('.ann-mark,.ann-card').forEach(el=>el.classList.remove('focused')); });
+    card.querySelector('.ann-anchor-label').addEventListener('click',()=>{
+      // scroll CE to mark
+      const mark=ce.querySelector(`.ann-mark[data-ann="${ann.id}"]`);
+      if(mark){ mark.scrollIntoView({block:'center',behavior:'smooth'}); focusAnnotation(ann.id); }
+    });
+    card.querySelector('.ann-del').addEventListener('click',e=>{ e.stopPropagation(); deleteAnnotation(ann.id); });
+
+    inner.appendChild(card);
+  });
+
+  // sync scroll
+  ce.onscroll=()=>{ inner.scrollTop=ce.scrollTop; };
+}
+
+// ── FLOAT BUTTON ─────────────────────────────────────
+const floatBtn=$('ann-float-btn');
+
+$('cornell-ce').addEventListener('mouseup',e=>{
+  setTimeout(()=>{
+    const sel=window.getSelection();
+    if(!sel||sel.isCollapsed||!sel.toString().trim()){ hideFloat(); return; }
+    // store selection before it gets lost
+    floatSelection=sel.toString().trim();
+    const range=sel.getRangeAt(0);
+    const rect=range.getBoundingClientRect();
+    floatBtn.style.left=Math.min(rect.left+rect.width/2-48, window.innerWidth-130)+'px';
+    floatBtn.style.top=Math.max(8,rect.top-40)+'px';
+    floatBtn.style.display='block';
+  },10);
+});
+
+floatBtn.addEventListener('mousedown',e=>{
+  e.preventDefault(); // prevent blur clearing selection
+});
+floatBtn.addEventListener('click',()=>{
+  if(floatSelection){ addAnnotation(floatSelection); floatSelection=null; }
+  hideFloat();
+});
+
+function hideFloat(){ floatBtn.style.display='none'; floatSelection=null; }
+
+document.addEventListener('mousedown',e=>{
+  if(e.target!==floatBtn) hideFloat();
+});
+
+// click on mark → focus annotation
+$('cornell-ce').addEventListener('click',e=>{
+  const mark=e.target.closest('.ann-mark');
+  if(mark) focusAnnotation(mark.dataset.ann);
+});
+
+// ── CORNELL EDITOR EVENTS ────────────────────────────
+$('cornell-ce').addEventListener('input',()=>{ schedSave(); updateStats(); onActivity(); });
+$('cornell-ce').addEventListener('keydown',e=>{
+  onActivity();
+  if((e.ctrlKey||e.metaKey)&&e.key==='m'){
+    e.preventDefault();
+    const sel=window.getSelection();
+    if(sel&&!sel.isCollapsed){
+      const txt=sel.toString().trim();
+      if(txt){ addAnnotation(txt); window.getSelection().removeAllRanges(); }
+    }
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveCurrentContent().then(()=>$('save-badge').textContent='saved'); }
+});
 
 // ── MARKDOWN ─────────────────────────────────────────
 function doPreview(){ $('preview').innerHTML=renderMD($('editor').value); }
-function renderMD(src) {
-  const blocks=[];
-  src=src.replace(/```([\s\S]*?)```/g,(_,c)=>{ blocks.push(`<pre><code>${esc(c.trim())}</code></pre>`); return `\x00B${blocks.length-1}\x00`; });
+function renderMD(src){
+  const bl=[];
+  src=src.replace(/```([\s\S]*?)```/g,(_,c)=>{ bl.push(`<pre><code>${esc(c.trim())}</code></pre>`); return `\x00B${bl.length-1}\x00`; });
   src=src.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   src=src.replace(/`([^`]+?)`/g,(_,c)=>`<code>${c}</code>`);
   src=src.replace(/^(#{1,6})\s+(.+)$/gm,(_,h,t)=>`<h${h.length}>${t}</h${h.length}>`);
@@ -666,88 +795,97 @@ function renderMD(src) {
   src=src.replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
   src=src.replace(/^\d+\.\s+(.+)$/gm,'<oli>$1</oli>');
   src=src.replace(/(<oli>[\s\S]*?<\/oli>\n?)+/g,m=>`<ol>${m.replace(/<\/?oli>/g,x=>x.replace('oli','li'))}</ol>`);
-  // Tables
-  src=src.replace(/((?:^\|.+\|\n?)+)/gm, tableBlock => {
-    const rows = tableBlock.trim().split('\n');
-    if (rows.length < 2) return tableBlock;
-    const isSep = r => /^\|[\s\|\-:]+\|$/.test(r.trim());
-    let html = '<table>';
-    let inBody = false;
-    rows.forEach((row, i) => {
-      if (isSep(row)) { inBody = true; return; }
-      const cells = row.trim().replace(/^\||\|$/g,'').split('|').map(c => c.trim());
-      if (i === 0) {
-        html += '<thead><tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr></thead><tbody>';
-      } else {
-        html += '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + '</tr>';
-      }
-    });
-    html += '</tbody></table>';
-    return html;
+  src=src.replace(/((?:^\|.+\|\n?)+)/gm,tb=>{
+    const rows=tb.trim().split('\n'); if(rows.length<2) return tb;
+    const isSep=r=>/^\|[\s|\-:]+\|$/.test(r.trim());
+    let html='<table>';
+    rows.forEach((row,i)=>{ if(isSep(row)) return; const cells=row.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim()); html+=i===0?'<thead><tr>'+cells.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>':'<tr>'+cells.map(c=>`<td>${c}</td>`).join('')+'</tr>'; });
+    return html+'</tbody></table>';
   });
-  src=src.replace(/\x00B(\d+)\x00/g,(_,i)=>blocks[+i]);
+  src=src.replace(/\x00B(\d+)\x00/g,(_,i)=>bl[+i]);
   return src.split(/\n{2,}/).map(b=>{ b=b.trim(); if(!b)return''; if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|img|table)/.test(b))return b; return `<p>${b.replace(/\n/g,'<br>')}</p>`; }).join('\n');
 }
 
 // ── EXPORT ───────────────────────────────────────────
-function exportDoc() {
-  if (!currentId||!docs[currentId]) return;
-  const d=docs[currentId],a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([d.content],{type:'text/plain;charset=utf-8'}));
+function exportDoc(){
+  if(!currentId||!docs[currentId]) return;
+  const d=docs[currentId];
+  const content=mode==='cornell'?ceToText($('cornell-ce')):d.content;
+  let output=content;
+  if(annotations.length>0){
+    const lines=content.split('\n'), result=[], used=new Set();
+    lines.forEach(line=>{
+      result.push(line);
+      annotations.forEach(ann=>{
+        if(!used.has(ann.id)&&line.includes(ann.anchor.slice(0,30))){
+          used.add(ann.id);
+          result.push('');
+          result.push('> [!note]');
+          ann.note.split('\n').forEach(nl=>result.push('> '+nl));
+          result.push('');
+        }
+      });
+    });
+    annotations.forEach(ann=>{ if(!used.has(ann.id)){ result.push('','> [!note] (unanchored)'); ann.note.split('\n').forEach(nl=>result.push('> '+nl)); result.push(''); } });
+    output=result.join('\n');
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([output],{type:'text/plain;charset=utf-8'}));
   a.download=(d.name.replace(/[^\w\s\-]/g,'').trim()||'document')+'.md';
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
 
 // ── IMPORT ───────────────────────────────────────────
-$('import-btn').onclick=()=>$('file-input').click();
 $('file-input').onchange=e=>{
-  const file=e.target.files[0]; if(!file)return;
+  const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=ev=>{
     const id=uid();
-    docs[id]={id,name:file.name.replace(/\.(md|txt|markdown)$/i,''),content:ev.target.result,created:Date.now(),updated:Date.now()};
+    const{content,anns}=parseCallouts(ev.target.result);
+    docs[id]={id,name:file.name.replace(/\.(md|txt|markdown)$/i,''),content,annotations:anns,cornellMode:false,created:Date.now(),updated:Date.now()};
     persistAll(); renderList(); openDoc(id);
   };
   reader.readAsText(file); e.target.value='';
 };
 
-// ── FOCUS ────────────────────────────────────────────
-function toggleFocus() {
-  focusMode=!focusMode;
-  document.body.classList.toggle('focus-mode',focusMode);
-  $('focus-btn').classList.toggle('on',focusMode);
-  $('kb-hint').style.display=focusMode?'none':'';
+function parseCallouts(raw){
+  const anns=[], lines=raw.split('\n'), result=[]; let i=0, last='';
+  while(i<lines.length){
+    const line=lines[i];
+    if(/^>\s*\[!note\]/.test(line)){
+      const noteLines=[]; i++;
+      while(i<lines.length&&lines[i].startsWith('>')){ noteLines.push(lines[i].replace(/^>\s?/,'')); i++; }
+      anns.push({id:uid(),anchor:last.slice(0,80),note:noteLines.join('\n').trim()});
+    } else { result.push(line); if(line.trim()) last=line.trim(); i++; }
+  }
+  return{content:result.join('\n').trim(),anns};
 }
 
+// ── FOCUS MODE ───────────────────────────────────────
+function toggleFocus(){ focusMode=!focusMode; document.body.classList.toggle('focus-mode',focusMode); $('focus-btn').classList.toggle('on',focusMode); $('kb-hint').style.display=focusMode?'none':''; }
+
 // ── AUTOSAVE ─────────────────────────────────────────
-function schedSave() {
+function schedSave(){
   $('save-badge').textContent='saving…'; clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{ await saveCurrentContent(); $('save-badge').textContent='saved'; },700);
 }
 
-// ── SETTINGS EVENTS ──────────────────────────────────
+// ── PLAIN EDITOR EVENTS ──────────────────────────────
+$('editor').addEventListener('input',()=>{ schedSave(); updateStats(); onActivity(); });
+$('editor').addEventListener('keydown',e=>{
+  onActivity();
+  if(e.key==='Tab'){ e.preventDefault(); const s=$('editor').selectionStart,end=$('editor').selectionEnd,v=$('editor').value; if(e.shiftKey){ const ls=v.lastIndexOf('\n',s-1)+1; if(v.slice(ls,ls+2)==='  '){ $('editor').value=v.slice(0,ls)+v.slice(ls+2); $('editor').selectionStart=$('editor').selectionEnd=Math.max(s-2,ls); } } else{ $('editor').value=v.slice(0,s)+'  '+v.slice(end); $('editor').selectionStart=$('editor').selectionEnd=s+2; } }
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveCurrentContent().then(()=>$('save-badge').textContent='saved'); }
+});
+
+// ── SETTINGS ─────────────────────────────────────────
 $('settings-btn').onclick=()=>{ $('change-pass-status').textContent=''; $('settings-panel').classList.add('open'); };
 $('settings-close').onclick=()=>$('settings-panel').classList.remove('open');
 $('settings-panel').onclick=e=>{ if(e.target===$('settings-panel')) $('settings-panel').classList.remove('open'); };
-
-$('font-select').onchange=e=>{
-  editorFont=e.target.value; applyFont(); savePrefs();
-};
-$('size-slider').oninput=e=>{
-  editorSize=parseInt(e.target.value);
-  $('size-val').textContent=editorSize+'px';
-  applyFont(); savePrefs();
-};
-$('timeout-select-main').onchange=e=>{
-  lockTimeout=parseInt(e.target.value);
-  $('timeout-select-lock').value=e.target.value;
-  savePrefs(); resetLockTimer();
-};
-$('timeout-select-lock').onchange=e=>{
-  lockTimeout=parseInt(e.target.value);
-  $('timeout-select-main').value=e.target.value;
-  savePrefs();
-};
+$('font-select').onchange=e=>{ editorFont=e.target.value; applyFont(); savePrefs(); };
+$('size-slider').oninput=e=>{ editorSize=parseInt(e.target.value); $('size-val').textContent=editorSize+'px'; applyFont(); savePrefs(); };
+$('timeout-select-main').onchange=e=>{ lockTimeout=parseInt(e.target.value); $('timeout-select-lock').value=e.target.value; savePrefs(); resetLockTimer(); };
+$('timeout-select-lock').onchange=e=>{ lockTimeout=parseInt(e.target.value); $('timeout-select-main').value=e.target.value; savePrefs(); };
 $('change-pass-btn').onclick=changePassphrase;
 
 // ── MODAL ────────────────────────────────────────────
@@ -760,12 +898,9 @@ $('m-create').onclick=confirmCreate;
 $('modal-bg').onclick=e=>{ if(e.target===$('modal-bg')) closeModal(); };
 $('modal-name').onkeydown=e=>{ if(e.key==='Enter')confirmCreate(); if(e.key==='Escape')closeModal(); };
 
-// ── DOC LIST ─────────────────────────────────────────
-// handled in mobile sidebar section above
-
 // ── TOPBAR ───────────────────────────────────────────
 $('title-input').oninput=()=>{
-  if(!currentId||!docs[currentId])return;
+  if(!currentId||!docs[currentId]) return;
   docs[currentId].name=$('title-input').value||'Untitled';
   docs[currentId].updated=Date.now(); renderList();
   clearTimeout(saveTimer);
@@ -773,61 +908,36 @@ $('title-input').oninput=()=>{
 };
 $('edit-btn').onclick=()=>setMode('edit');
 $('preview-btn').onclick=()=>setMode('preview');
+$('ann-btn').onclick=()=>setMode(mode==='cornell'?'edit':'cornell');
 $('export-btn').onclick=exportDoc;
+$('import-btn').onclick=()=>$('file-input').click();
 $('focus-btn').onclick=toggleFocus;
 $('lock-now-btn').onclick=async()=>{ await saveCurrentContent(); showLock(); };
 
-// ── EDITOR ───────────────────────────────────────────
-$('editor').oninput=()=>{ schedSave(); updateStats(); onActivity(); };
-$('editor').onkeydown=e=>{
-  onActivity();
-  if(e.key==='Tab'){
-    e.preventDefault();
-    const s=$('editor').selectionStart,end=$('editor').selectionEnd,v=$('editor').value;
-    if(e.shiftKey){ const ls=v.lastIndexOf('\n',s-1)+1; if(v.slice(ls,ls+2)==='  '){ $('editor').value=v.slice(0,ls)+v.slice(ls+2); $('editor').selectionStart=$('editor').selectionEnd=Math.max(s-2,ls); } }
-    else{ $('editor').value=v.slice(0,s)+'  '+v.slice(end); $('editor').selectionStart=$('editor').selectionEnd=s+2; }
-  }
-  if((e.metaKey||e.ctrlKey)&&e.key==='s'){ e.preventDefault(); saveCurrentContent().then(()=>$('save-badge').textContent='saved'); }
-};
-
 // ── GLOBAL SHORTCUTS ─────────────────────────────────
 document.addEventListener('keydown',e=>{
-  if(!cryptoKey)return;
+  if(!cryptoKey) return;
   onActivity();
-  const mod=e.metaKey||e.ctrlKey;
+  const mod=e.ctrlKey||e.metaKey;
   if(mod&&e.key==='n'){ e.preventDefault(); openModal(); }
-  if(mod&&e.key==='p'){ e.preventDefault(); if(currentId) setMode(mode==='edit'?'preview':'edit'); }
+  if(mod&&e.key==='p'&&!e.shiftKey){ e.preventDefault(); if(currentId) setMode(mode==='preview'?'edit':'preview'); }
   if(mod&&e.shiftKey&&e.key==='F'){ e.preventDefault(); if(currentId) toggleFocus(); }
   if(e.key==='Escape'&&focusMode) toggleFocus();
   if(e.key==='Escape'&&$('modal-bg').classList.contains('open')) closeModal();
   if(e.key==='Escape'&&$('settings-panel').classList.contains('open')) $('settings-panel').classList.remove('open');
+  if(e.key==='Escape') hideFloat();
 });
 document.addEventListener('mousemove',onActivity);
 document.addEventListener('click',onActivity);
 
 // ── MOBILE SIDEBAR ───────────────────────────────────
-function openSidebar() {
-  $('sidebar').classList.add('open');
-  $('sidebar-overlay').classList.add('open');
-}
-function closeSidebar() {
-  $('sidebar').classList.remove('open');
-  $('sidebar-overlay').classList.remove('open');
-}
-function isMobile() { return window.innerWidth <= 680; }
-
-$('hamburger').onclick = () => {
-  $('sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
-};
-$('sidebar-overlay').onclick = closeSidebar;
-
-// Close sidebar after selecting a doc on mobile
-const origDocListClick = $('doc-list').onclick;
-$('doc-list').onclick = e => {
-  const del = e.target.closest('[data-del]');
-  if (del) { e.stopPropagation(); deleteDoc(del.dataset.del); return; }
-  const item = e.target.closest('[data-id]');
-  if (item) { openDoc(item.dataset.id); if (isMobile()) closeSidebar(); }
+$('hamburger').onclick=()=>{ $('sidebar').classList.contains('open')?($('sidebar').classList.remove('open'),$('sidebar-overlay').classList.remove('open')):($('sidebar').classList.add('open'),$('sidebar-overlay').classList.add('open')); };
+$('sidebar-overlay').onclick=()=>{ $('sidebar').classList.remove('open'); $('sidebar-overlay').classList.remove('open'); };
+$('doc-list').onclick=e=>{
+  const del=e.target.closest('[data-del]');
+  if(del){ e.stopPropagation(); deleteDoc(del.dataset.del); return; }
+  const item=e.target.closest('[data-id]');
+  if(item){ openDoc(item.dataset.id); if(isMobile()){ $('sidebar').classList.remove('open'); $('sidebar-overlay').classList.remove('open'); } }
 };
 
 // ── LOCK SCREEN ──────────────────────────────────────
@@ -836,27 +946,12 @@ $('lock-pass').onkeydown=e=>{ if(e.key==='Enter') attemptUnlock(); };
 
 // ── INIT ─────────────────────────────────────────────
 loadPrefs();
-if (!localStorage.getItem(LS_SALT_KEY)) isFirstRun=true;
+if(!localStorage.getItem(LS_SALT_KEY)) isFirstRun=true;
 showLock();
 
-// ── SERVICE WORKER (PWA) ──────────────────────────────
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'oblique-writer-v1';
-    self.addEventListener('install', e => {
-      e.waitUntil(caches.open(CACHE).then(c => c.addAll([self.location.pathname])));
-      self.skipWaiting();
-    });
-    self.addEventListener('activate', e => {
-      e.waitUntil(clients.claim());
-    });
-    self.addEventListener('fetch', e => {
-      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-    });
-  `;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+if('serviceWorker' in navigator){
+  const sw=`const C='ow-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.pathname])));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 </script>
 </body>
