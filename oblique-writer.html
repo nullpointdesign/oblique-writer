@@ -565,6 +565,8 @@ function createDoc(name){
 
 function openDoc(id){
   if(!docs[id]) return;
+  // save current doc first
+  if(currentId&&currentId!==id) saveCurrentContent();
   currentId=id;
   const d=docs[id];
   if(!d.annotations) d.annotations=[];
@@ -573,11 +575,26 @@ function openDoc(id){
   $('statusbar').style.display='flex';
   $('empty').style.display='none';
   $('title-input').value=d.name;
+  // load content into both surfaces
   $('editor').value=d.content;
-  const m=d.cornellMode&&!isMobile()?'cornell':'edit';
-  setMode(m);
+  $('cornell-ce').innerHTML='';
+  ceFromText($('cornell-ce'),d.content,annotations);
+  // determine mode
+  const hasAnns=annotations.length>0;
+  const savedMode=d.cornellMode&&!isMobile()?'cornell':hasAnns&&!isMobile()?'cornell':'edit';
+  // set mode without syncing (already loaded above)
+  mode=savedMode;
+  $('edit-btn').classList.toggle('on',savedMode==='edit');
+  $('preview-btn').classList.toggle('on',savedMode==='preview');
+  $('ann-btn').classList.toggle('on',savedMode==='cornell');
+  $('editor').style.display=savedMode==='edit'?'block':'none';
+  $('preview').style.display='none';
+  $('cornell-wrap').classList.toggle('active',savedMode==='cornell');
+  updateAnnotationBanner();
   updateStats();
   renderList();
+  if(savedMode==='cornell'){ renderGutter(); setTimeout(()=>$('cornell-ce').focus(),50); }
+  else setTimeout(()=>$('editor').focus(),50);
 }
 
 async function saveCurrentContent(){
@@ -621,11 +638,30 @@ function updateStats(){
   $('s-reading').textContent=rt(w);
 }
 
+// ── ANNOTATION BANNER ────────────────────────────────
+function updateAnnotationBanner(){
+  let banner=$('ann-banner');
+  if(!banner){
+    banner=document.createElement('div');
+    banner.id='ann-banner';
+    banner.style.cssText='padding:6px 20px;background:#1a1510;border-bottom:1px solid #3a2a1a;font-size:10px;color:#c07838;letter-spacing:0.08em;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0';
+    banner.innerHTML='<span>This document has annotations —</span><span style="text-decoration:underline">switch to Annotate mode to view them</span>';
+    banner.onclick=()=>setMode('cornell');
+    $('main').insertBefore(banner,$('editor-wrap'));
+  }
+  const show=annotations.length>0&&mode==='edit';
+  banner.style.display=show?'flex':'none';
+}
+
 // ── MODE ─────────────────────────────────────────────
 function setMode(m){
   // sync content between editors when switching
-  if(mode==='edit'&&m==='cornell'){ ceFromText($('cornell-ce'),$('editor').value,annotations); }
-  if(mode==='cornell'&&m==='edit'){ $('editor').value=ceToText($('cornell-ce')); }
+  if(mode==='edit'&&m==='cornell'){
+    ceFromText($('cornell-ce'),$('editor').value,annotations);
+  }
+  if(mode==='cornell'&&(m==='edit'||m==='preview')){
+    $('editor').value=ceToText($('cornell-ce'));
+  }
   mode=m;
   $('edit-btn').classList.toggle('on',m==='edit');
   $('preview-btn').classList.toggle('on',m==='preview');
@@ -633,20 +669,20 @@ function setMode(m){
   $('editor').style.display=m==='edit'?'block':'none';
   $('preview').style.display=m==='preview'?'block':'none';
   $('cornell-wrap').classList.toggle('active',m==='cornell');
-  if(m==='preview'){ $('editor').value=ceToText($('cornell-ce')); doPreview(); }
+  if(m==='preview'){ doPreview(); }
   if(m==='edit') setTimeout(()=>$('editor').focus(),50);
   if(m==='cornell'){ renderGutter(); setTimeout(()=>$('cornell-ce').focus(),50); }
+  updateAnnotationBanner();
 }
 
 // ── ANNOTATIONS ──────────────────────────────────────
 function addAnnotation(anchor, note=''){
   const ann={id:uid(), anchor:anchor.trim().slice(0,120), note};
   annotations.push(ann);
-  // wrap anchor text in mark span
   wrapAnchorInCE(ann);
   renderGutter();
+  updateAnnotationBanner();
   schedSave();
-  // focus the new card's textarea
   setTimeout(()=>{
     const ta=document.querySelector(`.ann-card[data-ann="${ann.id}"] .ann-textarea`);
     if(ta) ta.focus();
@@ -661,9 +697,9 @@ function wrapAnchorInCE(ann){
 
 function deleteAnnotation(id){
   annotations=annotations.filter(a=>a.id!==id);
-  // re-render CE to remove mark
   ceFromText($('cornell-ce'), ceToText($('cornell-ce')), annotations);
   renderGutter();
+  updateAnnotationBanner();
   schedSave();
 }
 
@@ -773,7 +809,32 @@ $('cornell-ce').addEventListener('keydown',e=>{
 });
 
 // ── MARKDOWN ─────────────────────────────────────────
-function doPreview(){ $('preview').innerHTML=renderMD($('editor').value); }
+function doPreview(){
+  let src=$('editor').value;
+  // weave annotation callouts inline for preview visibility
+  if(annotations.length>0){
+    const lines=src.split('\n'), result=[], used=new Set();
+    lines.forEach(line=>{
+      result.push(line);
+      annotations.forEach(ann=>{
+        if(!used.has(ann.id)&&ann.note.trim()&&line.includes(ann.anchor.slice(0,30))){
+          used.add(ann.id);
+          result.push('');
+          result.push('> **Note:** '+ann.note.replace(/\n/g,' '));
+          result.push('');
+        }
+      });
+    });
+    // unmatched
+    annotations.forEach(ann=>{
+      if(!used.has(ann.id)&&ann.note.trim()){
+        result.push('','> **Note:** '+ann.note.replace(/\n/g,' '),'');
+      }
+    });
+    src=result.join('\n');
+  }
+  $('preview').innerHTML=renderMD(src);
+}
 function renderMD(src){
   const bl=[];
   src=src.replace(/```([\s\S]*?)```/g,(_,c)=>{ bl.push(`<pre><code>${esc(c.trim())}</code></pre>`); return `\x00B${bl.length-1}\x00`; });
