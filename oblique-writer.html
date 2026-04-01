@@ -516,44 +516,56 @@ function rt(w){ const m=Math.ceil(w/200); return m<1?'':`${m} min read`; }
 function isMobile(){ return window.innerWidth<=680; }
 
 // ── CONTENT HELPERS ──────────────────────────────────
-// Get plain text from contenteditable, preserving newlines
+// Robust ceToText — handles div, p, br, span across all browsers
 function ceToText(el){
-  let text='';
-  el.childNodes.forEach(node=>{
-    if(node.nodeType===3) text+=node.textContent;
-    else if(node.nodeName==='BR') text+='\n';
-    else if(node.nodeName==='DIV'||node.nodeName==='P'){
-      if(text && !text.endsWith('\n')) text+='\n';
-      text+=node.textContent;
-    } else text+=node.textContent;
+  // Clone to avoid mutating live DOM
+  const clone=el.cloneNode(true);
+  // Replace <br> with newline markers
+  clone.querySelectorAll('br').forEach(br=>{
+    br.replaceWith('\n');
   });
+  // Replace block elements (div, p) with newline + their content
+  clone.querySelectorAll('div,p').forEach(block=>{
+    const nl=document.createTextNode('\n');
+    block.before(nl);
+    while(block.firstChild) block.before(block.firstChild);
+    block.remove();
+  });
+  let text=clone.textContent;
+  // Strip leading newline that contenteditable often inserts
+  if(text.startsWith('\n')) text=text.slice(1);
   return text;
 }
 
-// Set contenteditable content with annotation marks
+// ceFromText — sets contenteditable content with annotation mark spans
 function ceFromText(el, text, anns){
-  if(!anns||anns.length===0){ el.textContent=text; return; }
-  // Build content with marks
-  // Sort annotations by position in text
+  // Escape for HTML
   let html=esc(text);
-  // Apply marks from end to start to preserve offsets
-  const marked=[];
-  anns.forEach(ann=>{
-    const anchor=ann.anchor.slice(0,60);
-    const escaped=esc(anchor);
-    const idx=html.indexOf(escaped);
-    if(idx>=0) marked.push({idx,len:escaped.length,id:ann.id,anchor:escaped});
-  });
-  marked.sort((a,b)=>b.idx-a.idx);
-  marked.forEach(m=>{
-    const before=html.slice(0,m.idx);
-    const match=html.slice(m.idx,m.idx+m.len);
-    const after=html.slice(m.idx+m.len);
-    html=before+`<span class="ann-mark" data-ann="${m.id}">${match}</span>`+after;
-  });
-  // Convert newlines to divs for contenteditable
+  // Apply annotation marks (from end to start to preserve offsets)
+  if(anns&&anns.length>0){
+    const marked=[];
+    anns.forEach(ann=>{
+      const escaped=esc(ann.anchor.slice(0,60));
+      const idx=html.indexOf(escaped);
+      if(idx>=0) marked.push({idx,len:escaped.length,id:ann.id});
+    });
+    marked.sort((a,b)=>b.idx-a.idx);
+    marked.forEach(m=>{
+      html=html.slice(0,m.idx)+`<span class="ann-mark" data-ann="${m.id}">${html.slice(m.idx,m.idx+m.len)}</span>`+html.slice(m.idx+m.len);
+    });
+  }
+  // Convert to contenteditable div structure
+  // Each line becomes a <div>; blank lines become <div><br></div>
   const lines=html.split('\n');
-  el.innerHTML=lines.map((l,i)=>i===0?l:`<div>${l||'<br>'}</div>`).join('');
+  if(lines.length===1){
+    el.innerHTML=lines[0]||'<br>';
+  } else {
+    el.innerHTML=lines.map((l,i)=>
+      i===0
+        ? (l||'<br>')
+        : `<div>${l||'<br>'}</div>`
+    ).join('');
+  }
 }
 
 // ── DOCS ─────────────────────────────────────────────
@@ -852,10 +864,36 @@ function renderMD(src){
   src=src.replace(/^&gt;\s?(.+)$/gm,'<blockquote>$1</blockquote>');
   src=src.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%">');
   src=src.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
-  src=src.replace(/^[ \t]*[-*+]\s+(.+)$/gm,'<li>$1</li>');
-  src=src.replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
-  src=src.replace(/^\d+\.\s+(.+)$/gm,'<oli>$1</oli>');
-  src=src.replace(/(<oli>[\s\S]*?<\/oli>\n?)+/g,m=>`<ol>${m.replace(/<\/?oli>/g,x=>x.replace('oli','li'))}</ol>`);
+  // Nested list support — process line by line
+  src=src.replace(/((?:^[ \t]*(?:[-*+]|\d+\.)[ \t]+.+(?:\n|$))+)/gm, listBlock=>{
+    function indentOf(line){ return (line.match(/^([ \t]*)/)||['',''])[1].length; }
+    function parseList(lines, baseIndent){
+      let html='', listTag='', i=0;
+      while(i<lines.length){
+        const line=lines[i];
+        const ind=indentOf(line);
+        if(ind<baseIndent){ break; }
+        if(ind>baseIndent){
+          // nested block — collect and recurse
+          const nested=[];
+          while(i<lines.length && indentOf(lines[i])>baseIndent) nested.push(lines[i++]);
+          if(html) html=html.slice(0,-5)+parseList(nested,baseIndent+2)+'</li>';
+          continue;
+        }
+        const m=line.match(/^[ \t]*([-*+]|\d+\.)[ \t]+(.+)$/);
+        if(!m){ i++; continue; }
+        const isOl=/^\d+\./.test(m[1]);
+        if(!listTag){ listTag=isOl?'ol':'ul'; html+=`<${listTag}>`; }
+        html+=`<li>${m[2]}</li>`;
+        i++;
+      }
+      if(listTag) html+=`</${listTag}>`;
+      return html;
+    }
+    const lines=listBlock.trimEnd().split('\n').filter(l=>l.trim());
+    const baseIndent=lines.length?indentOf(lines[0]):0;
+    return parseList(lines,baseIndent);
+  });
   src=src.replace(/((?:^\|.+\|\n?)+)/gm,tb=>{
     const rows=tb.trim().split('\n'); if(rows.length<2) return tb;
     const isSep=r=>/^\|[\s|\-:]+\|$/.test(r.trim());
