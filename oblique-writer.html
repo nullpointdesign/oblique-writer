@@ -270,21 +270,32 @@ body.focus-mode #cornell-gutter{display:none}
 #inbox-count{font-size:10px;color:var(--text3);align-self:center}
 
 @media(max-width:680px){
-  #hamburger{display:flex;align-items:center}
-  #kb-hint{display:none}
-  #ann-btn{display:none!important}
-  #sidebar{position:fixed;top:0;left:0;bottom:0;z-index:400;width:85vw;max-width:320px;transform:translateX(-100%);transition:transform 0.22s ease;border-right:1px solid var(--border2)}
-  #sidebar.open{transform:translateX(0)}
-  #editor,#preview{padding:24px 20px}
-  #topbar{padding:6px 12px;gap:6px;overflow-x:auto}
-  #topbar::-webkit-scrollbar{display:none}
-  .sep{display:none}
-  #save-badge{display:none}
-  #title-input{font-size:13px}
-  #statusbar{padding:3px 12px;gap:12px}
+  /* hide everything except the inbox */
+  #titlebar{display:none!important}
+  #main{display:none!important}
+  #sidebar-overlay{display:none!important}
+  #sidebar-tabs{display:none}
+  #doc-panel{display:none!important}
+
+  /* sidebar becomes the full screen */
+  #app{display:block!important}
+  #sidebar{
+    position:fixed;inset:0;width:100%;min-width:0;
+    display:flex;flex-direction:column;
+    border-right:none;
+  }
+  #inbox-panel{display:flex!important}
+
+  /* expand compose textarea */
+  #inbox-input{min-height:80px;font-size:14px}
+  #inbox-add-btn{padding:8px;font-size:11px}
+
+  /* entries readable */
+  .inbox-body{font-size:13px}
+  .inbox-ts{font-size:10px}
+
+  /* lock screen */
   .lock-box{width:90vw;padding:24px 20px}
-  #settings-box{width:92vw;padding:20px}
-  #cornell-gutter{display:none!important}
 }
 </style>
 </head>
