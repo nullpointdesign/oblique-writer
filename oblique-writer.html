@@ -265,8 +265,8 @@ body.focus-mode #cornell-gutter{display:none}
 .inbox-entry:hover .inbox-del{opacity:1}
 .inbox-del:hover{color:var(--danger)}
 #inbox-foot{padding:8px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:6px}
-#inbox-export-btn{flex:1;background:none;border:1px solid var(--border2);color:var(--text2);padding:5px;border-radius:3px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all 0.15s}
-#inbox-export-btn:hover{border-color:var(--accent);color:var(--accent)}
+#inbox-export-btn,#inbox-merge-btn{flex:1;background:none;border:1px solid var(--border2);color:var(--text2);padding:5px;border-radius:3px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all 0.15s}
+#inbox-export-btn:hover,#inbox-merge-btn:hover{border-color:var(--accent);color:var(--accent)}
 #inbox-count{font-size:10px;color:var(--text3);align-self:center}
 
 @media(max-width:680px){
@@ -364,9 +364,11 @@ body.focus-mode #cornell-gutter{display:none}
       <div id="inbox-list"></div>
       <div id="inbox-foot">
         <button id="inbox-export-btn">Export .md</button>
+        <button id="inbox-merge-btn">Merge .md</button>
         <span id="inbox-count"></span>
       </div>
     </div>
+    <input type="file" id="inbox-merge-input" accept=".md,.txt" style="display:none">
   </div>
 
   <div id="main">
@@ -1000,6 +1002,48 @@ function exportInbox(){
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
 
+function mergeInbox(){
+  $('inbox-merge-input').click();
+}
+
+function parseMdInbox(text){
+  // Split on --- separators, parse each block for ### timestamp + body
+  const blocks=text.split(/\n---\n/);
+  const entries=[];
+  blocks.forEach(block=>{
+    block=block.trim();
+    if(!block) return;
+    const m=block.match(/^###\s+(\d{4}\.\d{2}\.\d{2}\s+\d{2}:\d{2})\s*\n+([\s\S]+)$/);
+    if(m){
+      entries.push({id:uid(), ts:m[1].trim(), text:m[2].trim()});
+    }
+  });
+  return entries;
+}
+
+function doMerge(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const incoming=parseMdInbox(ev.target.result);
+    if(!incoming.length){ alert('No entries found in that file.'); return; }
+    // merge: combine, deduplicate by ts+text, sort newest first
+    const combined=[...inbox,...incoming];
+    const seen=new Set();
+    const merged=combined.filter(e=>{
+      const key=e.ts+'|'+e.text.slice(0,80);
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    merged.sort((a,b)=>b.ts.localeCompare(a.ts));
+    inbox=merged;
+    persistInbox();
+    renderInbox();
+    $('inbox-merge-input').value='';
+  };
+  reader.readAsText(file);
+}
+
+
 function switchSidebarTab(tab){
   inboxView=tab;
   $('tab-docs').classList.toggle('on',tab==='docs');
@@ -1116,6 +1160,8 @@ $('inbox-input').addEventListener('keydown',e=>{
   if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); addInboxEntry(); }
 });
 $('inbox-export-btn').onclick=exportInbox;
+$('inbox-merge-btn').onclick=mergeInbox;
+$('inbox-merge-input').onchange=e=>{ const f=e.target.files[0]; if(f) doMerge(f); };
 $('ann-btn').onclick=()=>setMode('cornell');
 $('preview-btn').onclick=()=>setMode('preview');
 $('export-btn').onclick=exportDoc;
