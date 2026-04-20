@@ -122,7 +122,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 #cornell-wrap.active{display:flex}
 
 /* GUTTER */
-#cornell-gutter{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;position:relative}
+#cornell-gutter{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;position:relative;transition:width 0.2s ease,min-width 0.2s ease}
+#cornell-gutter.collapsed{width:20px;min-width:20px}
+#cornell-gutter.collapsed #cornell-gutter-inner,#cornell-gutter.collapsed #gutter-hint{display:none}
+#gutter-toggle{position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:10;background:var(--surface2);border:none;border-left:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:14px;padding:6px 3px;line-height:1;transition:color 0.15s;height:40px;width:20px;display:flex;align-items:center;justify-content:center}
+#gutter-toggle:hover{color:var(--accent)}
+#cornell-gutter.collapsed #gutter-toggle{border-left:none;border-right:1px solid var(--border2)}
 #cornell-gutter-inner{flex:1;overflow-y:auto;position:relative;min-height:0}
 #cornell-gutter-inner::-webkit-scrollbar{width:3px}
 #cornell-gutter-inner::-webkit-scrollbar-thumb{background:var(--border2)}
@@ -396,6 +401,7 @@ body.focus-mode #cornell-gutter{display:none}
 
       <div id="cornell-wrap">
         <div id="cornell-gutter">
+          <button id="gutter-toggle" title="Collapse annotations">‹</button>
           <div id="cornell-gutter-inner">
             <div id="gutter-hint">Select text in the editor,<br>then press Ctrl+M<br>or click + Annotate</div>
           </div>
@@ -976,9 +982,10 @@ function renderInbox(){
     const el=document.createElement('div');
     el.className='inbox-entry';
     el.dataset.id=entry.id;
-    el.innerHTML=`<div class="inbox-ts">${esc(entry.ts)}</div><textarea class="inbox-body" rows="3" spellcheck="true">${esc(entry.text)}</textarea><button class="inbox-del" title="Delete">✕</button>`;
+    el.innerHTML=`<div class="inbox-ts">${esc(entry.ts)}</div><textarea class="inbox-body" rows="3" spellcheck="true"></textarea><button class="inbox-del" title="Delete">✕</button>`;
     // auto-resize textarea
     const ta=el.querySelector('.inbox-body');
+    ta.value=entry.text;
     ta.addEventListener('input',()=>{
       entry.text=ta.value;
       ta.style.height='auto';
@@ -1111,6 +1118,12 @@ function parseCallouts(raw){
 // ── FOCUS MODE ───────────────────────────────────────
 function toggleFocus(){ focusMode=!focusMode; document.body.classList.toggle('focus-mode',focusMode); $('focus-btn').classList.toggle('on',focusMode); $('kb-hint').style.display=focusMode?'none':''; }
 
+function toggleGutter(){
+  const g=$('cornell-gutter');
+  const collapsed=g.classList.toggle('collapsed');
+  $('gutter-toggle').textContent=collapsed?'›':'‹';
+}
+
 // ── AUTOSAVE ─────────────────────────────────────────
 function schedSave(){
   $('save-badge').textContent='saving…'; clearTimeout(saveTimer);
@@ -1167,6 +1180,7 @@ $('preview-btn').onclick=()=>setMode('preview');
 $('export-btn').onclick=exportDoc;
 $('import-btn').onclick=()=>$('file-input').click();
 $('focus-btn').onclick=toggleFocus;
+$('gutter-toggle').onclick=toggleGutter;
 $('lock-now-btn').onclick=async()=>{ await saveCurrentContent(); showLock(); };
 
 // ── GLOBAL SHORTCUTS ─────────────────────────────────
